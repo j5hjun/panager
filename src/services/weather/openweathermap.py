@@ -111,9 +111,7 @@ class WeatherService:
             raise ValueError("날씨 데이터 형식이 올바르지 않습니다.") from e
         except Exception as e:
             logger.error(f"날씨 조회 실패: {e}")
-            raise ValueError(
-                f"날씨 조회 중 예상치 못한 오류가 발생했습니다: {str(e)}"
-            ) from e
+            raise ValueError(f"날씨 조회 중 예상치 못한 오류가 발생했습니다: {str(e)}") from e
 
     async def get_weather_data(self, city: str | None = None) -> WeatherData:
         """
