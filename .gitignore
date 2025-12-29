@@ -1,0 +1,68 @@
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==================== 가상환경 ====================
+.venv/
+venv/
+ENV/
+env/
+
+# ==================== IDE ====================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ==================== 테스트 ====================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+
+# ==================== mypy ====================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ==================== 환경 변수 ====================
+.env
+.env.local
+.env.*.local
+
+# ==================== 데이터 ====================
+data/*.db
+data/*.sqlite
+*.log
+
+# ==================== 기타 ====================
+*.bak
+*.tmp
+
+# ==================== 문서 ====================
+SKILL.md
+plan-template.md
