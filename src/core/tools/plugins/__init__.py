@@ -5,9 +5,11 @@ Tool Plugins
 """
 
 from src.core.tools.plugins.calendar import CalendarTool
+from src.core.tools.plugins.directions import DirectionsTool
 from src.core.tools.plugins.weather import WeatherTool
 
 __all__ = [
     "WeatherTool",
     "CalendarTool",
+    "DirectionsTool",
 ]

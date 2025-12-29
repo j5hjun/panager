@@ -12,9 +12,10 @@ from typing import Any
 
 from src.core.logic.conversation import ConversationManager
 from src.core.prompts.panager_persona import get_system_prompt
-from src.core.tools.plugins import CalendarTool, WeatherTool
+from src.core.tools.plugins import CalendarTool, DirectionsTool, WeatherTool
 from src.core.tools.registry import ToolRegistry
 from src.services.calendar.sqlite_calendar import CalendarService
+from src.services.directions.kakao_maps import DirectionsService
 from src.services.llm.client import LLMClient
 from src.services.weather.openweathermap import WeatherService
 
@@ -26,6 +27,8 @@ TOOL_FUNCTION_TO_PLUGIN: dict[str, str] = {
     "check_umbrella": "weather",
     "get_schedule": "calendar",
     "add_schedule": "calendar",
+    "get_directions": "directions",
+    "calculate_departure": "directions",
 }
 
 
@@ -47,6 +50,7 @@ class AIService:
         weather_api_key: str | None = None,
         default_city: str = "Seoul",
         calendar_db_path: str = "data/calendar.db",
+        kakao_api_key: str | None = None,
     ):
         """
         AIService 초기화
@@ -60,6 +64,7 @@ class AIService:
             weather_api_key: OpenWeatherMap API 키
             default_city: 기본 도시명
             calendar_db_path: 일정 DB 경로
+            kakao_api_key: Kakao REST API 키 (길찾기용)
         """
         self.assistant_name = assistant_name
         self.default_city = default_city
@@ -95,6 +100,14 @@ class AIService:
         calendar_tool = CalendarTool(calendar_service=self.calendar)
         self.registry.register(calendar_tool)
         logger.info("일정 도구 등록됨")
+
+        # 길찾기 서비스 및 도구 초기화 (옵션)
+        self.directions: DirectionsService | None = None
+        if kakao_api_key:
+            self.directions = DirectionsService(api_key=kakao_api_key)
+            directions_tool = DirectionsTool(directions_service=self.directions)
+            self.registry.register(directions_tool)
+            logger.info("길찾기 도구 등록됨")
 
         # 시스템 프롬프트
         self.system_prompt = get_system_prompt(assistant_name)
