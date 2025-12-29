@@ -244,8 +244,8 @@
 
 ---
 
-### Phase 3: HP T620 서버 배포
-**Goal**: HP T620 Ubuntu 서버에 docker-compose로 프로덕션 배포
+### Phase 3: HP T620 서버 배포 (Self-hosted Runner)
+**Goal**: GitHub Actions 셀프호스팅 러너를 통한 자동 배포
 **Estimated Time**: 2-3 hours
 **Status**: ⏳ Pending
 
@@ -253,79 +253,50 @@
 
 **🔴 RED: Write Failing Tests First**
 - [ ] **Test 3.1**: 서버 환경 테스트
-  - 로컬에서 docker-compose로 실행 성공
-  - 환경 변수가 정상 로드됨
+  - 셀프호스팅 러너가 온라인 상태
+  - Docker 명령어 실행 가능
 
 **🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 3.2**: docker-compose.yml 작성 (프로덕션용)
-  - File: `docker-compose.yml`
+- [ ] **Task 3.2**: 셀프호스팅 러너 확인
+  - GitHub repo → Settings → Actions → Runners
+  - HP T620 러너가 Online 상태인지 확인
+  - 러너가 없으면 새로 등록
+
+- [ ] **Task 3.3**: 배포 워크플로우 작성
+  - File: `.github/workflows/deploy.yml`
   - Details:
-    ```yaml
-    version: '3.8'
-    services:
-      panager:
-        build: .
-        restart: unless-stopped
-        volumes:
-          - ./data:/app/data
-        env_file:
-          - .env
-    ```
+    - self-hosted 러너에서 실행
+    - docker compose down → build → up -d
+    - Health check
 
-- [ ] **Task 3.3**: HP T620 서버 준비
-  - Ubuntu 24.04 설치 확인
-  - Docker 설치: `curl -fsSL https://get.docker.com | sh`
-  - Docker Compose 설치
-  - 사용자를 docker 그룹에 추가
+- [ ] **Task 3.4**: 서버에 .env 파일 설정
+  - 러너 작업 디렉토리에 .env 파일 생성
+  - 환경 변수 설정 (API 키 등)
 
-- [ ] **Task 3.4**: 서버에 코드 배포
-  - Git clone 또는 rsync로 전송
-  - .env 파일 생성 및 환경 변수 설정
-  - 디렉토리 구조 확인
-
-- [ ] **Task 3.5**: systemd 서비스 등록 (자동 시작)
-  - File: `/etc/systemd/system/panager.service`
-  - Details:
-    ```ini
-    [Unit]
-    Description=Panizer AI Assistant
-    After=docker.service
-    
-    [Service]
-    Type=oneshot
-    RemainAfterExit=yes
-    WorkingDirectory=/home/user/panager
-    ExecStart=/usr/bin/docker-compose up -d
-    ExecStop=/usr/bin/docker-compose down
-    
-    [Install]
-    WantedBy=multi-user.target
-    ```
-
-- [ ] **Task 3.6**: 배포 및 실행
-  - `docker-compose up -d` 실행
-  - `systemctl enable panager` (부팅 시 자동 시작)
+- [ ] **Task 3.5**: 배포 테스트
+  - main 브랜치에 푸시
+  - GitHub Actions에서 배포 성공 확인
+  - Slack Bot 온라인 확인
 
 **🔵 REFACTOR: Clean Up Code**
-- [ ] **Task 3.7**: 배포 스크립트 작성
+- [ ] **Task 3.6**: 배포 스크립트 작성 (수동 배포용)
   - File: `scripts/deploy.sh`
-  - Git pull → docker-compose build → docker-compose up -d
+  - 수동 배포 시 사용
 
 #### Quality Gate ✋
 
 **Deployment Validation**:
+- [ ] GitHub Actions에서 배포 성공
 - [ ] HP T620에서 애플리케이션 정상 실행
 - [ ] Slack Bot이 온라인 상태
 - [ ] 모든 환경 변수 정상 로드
 - [ ] 볼륨 마운트로 DB 데이터 영속성 확인
-- [ ] 서버 재부팅 후 자동 시작 확인
 
 **Manual Test Checklist**:
 - [ ] Slack에서 "안녕" → 응답 확인
 - [ ] 날씨 조회 기능 동작
 - [ ] 일정 관리 기능 동작
-- [ ] 아침 브리핑 스케줄러 동작 (다음날 확인)
-- [ ] 24시간 안정성 확인
+- [ ] 코드 푸시 → 자동 배포 → 적용 확인
 
 ---
 

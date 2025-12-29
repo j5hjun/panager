@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create .env file
+      run: |
+        echo "${{ secrets.ENV_FILE }}" > .env
+        chmod 600 .env
+    
+    - name: Stop existing container
+      run: docker compose down || true
+    
+    - name: Build and start container
+      run: docker compose up -d --build
+    
+    - name: Wait for startup
+      run: sleep 10
+    
+    - name: Check deployment status
+      run: |
+        docker compose ps
+        docker compose logs --tail=30
+    
+    - name: Health check
+      run: |
+        if docker compose ps | grep -q "running"; then
+          echo "✅ 배포 성공!"
+        else
+          echo "❌ 배포 실패"
+          exit 1
+        fi
