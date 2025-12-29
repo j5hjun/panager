@@ -49,6 +49,9 @@ coverage.xml
 .dmypy.json
 dmypy.json
 
+# ==================== ruff ====================
+.ruff_cache/
+
 # ==================== 환경 변수 ====================
 .env
 .env.local
