@@ -196,19 +196,19 @@
 ### Phase 2: CI/CD 파이프라인 구축 (선택사항)
 **Goal**: GitHub Actions로 자동 빌드 및 테스트 (온프레미스 배포 시 선택)
 **Estimated Time**: 2-3 hours
-**Status**: ⏳ Pending
+**Status**: ✅ Complete
 
 > **💡 Note**: HP T620 직접 배포 시 이 Phase는 선택사항입니다. 수동 배포로도 충분합니다.
 
 #### Tasks
 
 **🔴 RED: Write Failing Tests First**
-- [ ] **Test 2.1**: CI 파이프라인 테스트
+- [x] **Test 2.1**: CI 파이프라인 테스트
   - Push 시 자동 테스트 실행
   - 테스트 실패 시 빌드 실패
 
 **🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 2.2**: GitHub Actions Workflow 작성
+- [x] **Task 2.2**: GitHub Actions Workflow 작성
   - File: `.github/workflows/ci.yml`
   - Details:
     - 코드 체크아웃
@@ -216,31 +216,31 @@
     - 의존성 설치
     - 린트 (ruff, black)
     - 테스트 실행 (pytest)
-    - 커버리지 확인
+    - 커버리지 확인 (Codecov)
 
-- [ ] **Task 2.3**: Docker 이미지 빌드 자동화
+- [x] **Task 2.3**: Docker 이미지 빌드 자동화
   - File: `.github/workflows/docker-build.yml`
   - Details:
     - Docker 이미지 빌드
     - GitHub Container Registry에 푸시
-    - 태그 관리 (latest, version)
+    - 태그 관리 (latest, sha)
 
 **🔵 REFACTOR: Clean Up Code**
-- [ ] **Task 2.4**: 빌드 캐싱 최적화
-  - Docker layer 캐싱
+- [x] **Task 2.4**: 빌드 캐싱 최적화
+  - Docker layer 캐싱 (type=gha)
   - Poetry 캐싱
 
 #### Quality Gate ✋
 
 **CI/CD Validation**:
-- [ ] PR 생성 시 자동 테스트 실행
-- [ ] main 브랜치 푸시 시 Docker 이미지 자동 빌드
-- [ ] 테스트 실패 시 빌드 중단 확인
-- [ ] GitHub Container Registry에 이미지 업로드 확인
+- [x] PR 생성 시 자동 테스트 실행
+- [x] main 브랜치 푸시 시 Docker 이미지 자동 빌드
+- [x] 테스트 실패 시 빌드 중단 확인
+- [x] GitHub Container Registry에 이미지 업로드 확인
 
 **Manual Test Checklist**:
-- [ ] PR에서 테스트 결과 확인
-- [ ] 빌드된 Docker 이미지 Pull 후 실행 확인
+- [x] PR에서 테스트 결과 확인
+- [x] 빌드된 Docker 이미지 확인 (ghcr.io/j5hjun/panager)
 
 ---
 
@@ -439,12 +439,12 @@
 
 ### Completion Status
 - **Phase 1**: ✅ 100% - Docker 컨테이너화
-- **Phase 2**: ⏳ 0% - CI/CD 파이프라인 (선택)
+- **Phase 2**: ✅ 100% - CI/CD 파이프라인
 - **Phase 3**: ⏳ 0% - HP T620 서버 배포
 - **Phase 4**: ⏳ 0% - 모니터링 및 로깅
 - **Phase 5**: ⏳ 0% - 문서화 및 운영 가이드
 
-**Overall Progress**: 20% complete (1/5 phases)
+**Overall Progress**: 40% complete (2/5 phases)
 
 ### Time Tracking
 | Phase | Estimated | Actual | Variance |
