@@ -108,6 +108,8 @@ poetry run pytest tests/unit/test_config.py -v
 
 ## 🛠️ 개발
 
+### 코드 품질 도구
+
 ```bash
 # 코드 포맷팅
 poetry run black .
@@ -121,6 +123,15 @@ poetry run ruff check . --fix
 # 타입 체크
 poetry run mypy src/
 ```
+
+### Git 워크플로우
+
+이 프로젝트는 **Feature Branch + Pull Request 기반 워크플로우**를 사용합니다.
+main 브랜치에 직접 푸시는 금지되어 있으며, 모든 변경사항은 PR을 통해 머지됩니다.
+
+상세한 워크플로우는 다음 문서를 참고하세요:
+- [Git 워크플로우 가이드](.agent/workflows/git-workflow.md)
+- [기여 가이드 (CONTRIBUTING.md)](CONTRIBUTING.md)
 
 ## 📋 개발 현황
 
