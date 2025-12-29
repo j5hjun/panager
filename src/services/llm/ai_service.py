@@ -12,12 +12,21 @@ from typing import Any
 
 from src.core.logic.conversation import ConversationManager
 from src.core.prompts.panager_persona import get_system_prompt
-from src.core.tools.definitions import get_all_tools
+from src.core.tools.plugins import CalendarTool, WeatherTool
+from src.core.tools.registry import ToolRegistry
 from src.services.calendar.sqlite_calendar import CalendarService
 from src.services.llm.client import LLMClient
 from src.services.weather.openweathermap import WeatherService
 
 logger = logging.getLogger(__name__)
+
+# 도구 이름 → 플러그인 이름 매핑 (LLM이 호출하는 함수명 → 플러그인)
+TOOL_FUNCTION_TO_PLUGIN: dict[str, str] = {
+    "get_current_weather": "weather",
+    "check_umbrella": "weather",
+    "get_schedule": "calendar",
+    "add_schedule": "calendar",
+}
 
 
 class AIService:
@@ -65,31 +74,43 @@ class AIService:
         # 대화 관리자 초기화
         self.conversation = ConversationManager(max_history=max_history)
 
-        # 날씨 서비스 초기화 (옵션)
+        # Tool Registry 초기화
+        self.registry = ToolRegistry()
+        self.registry.clear()  # 기존 등록 도구 초기화
+
+        # 날씨 서비스 및 도구 초기화 (옵션)
         self.weather: WeatherService | None = None
         if weather_api_key:
             self.weather = WeatherService(
                 api_key=weather_api_key,
                 default_city=default_city,
             )
-            logger.info("날씨 서비스 활성화됨")
+            # WeatherTool 등록
+            weather_tool = WeatherTool(weather_service=self.weather)
+            self.registry.register(weather_tool)
+            logger.info("날씨 도구 등록됨")
 
-        # 일정 서비스 초기화
+        # 일정 서비스 및 도구 초기화
         self.calendar = CalendarService(db_path=calendar_db_path)
-        logger.info("일정 서비스 활성화됨")
+        calendar_tool = CalendarTool(calendar_service=self.calendar)
+        self.registry.register(calendar_tool)
+        logger.info("일정 도구 등록됨")
 
         # 시스템 프롬프트
         self.system_prompt = get_system_prompt(assistant_name)
 
-        # 도구 정의
-        self.tools = get_all_tools() if self.weather else []
+        # 도구 정의 (Registry에서 가져옴)
+        self.tools = self.registry.get_all_tool_definitions()
 
         # 스케줄러와 메시지 발송 콜백 (외부에서 주입)
         self._scheduler: Any = None
         self._send_message: Callable[[str, str], None] | None = None
         self._reminder_count = 0
 
-        logger.info(f"AIService 초기화 완료: {assistant_name} (tools={len(self.tools)})")
+        logger.info(
+            f"AIService 초기화 완료: {assistant_name} "
+            f"(tools={len(self.tools)}, plugins={self.registry.list_tools()})"
+        )
 
     def set_scheduler(self, scheduler: Any, send_message: Callable[[str, str], None]):
         """
@@ -107,11 +128,11 @@ class AIService:
         self, tool_name: str, arguments: dict[str, Any], user_id: str = ""
     ) -> str:
         """
-        도구 실행
+        도구 실행 (Registry를 통해 플러그인 실행)
 
         Args:
-            tool_name: 도구 이름
-            arguments: 도구 인자
+            tool_name: LLM이 호출한 함수 이름 (예: 'get_current_weather')
+            arguments: 함수 인자
             user_id: 사용자 ID (리마인더용)
 
         Returns:
@@ -120,31 +141,12 @@ class AIService:
         logger.info(f"도구 실행: {tool_name}({arguments})")
 
         try:
-            if tool_name == "get_current_weather":
-                if not self.weather:
-                    return "날씨 서비스가 설정되지 않았습니다."
-                city = arguments.get("city", self.default_city)
-                try:
-                    return await self.weather.get_weather_formatted(city)
-                except ValueError as e:
-                    return f"😅 {str(e)}"
-
-            elif tool_name == "check_umbrella":
-                if not self.weather:
-                    return "날씨 서비스가 설정되지 않았습니다."
-                city = arguments.get("city", self.default_city)
-                try:
-                    needs, message = await self.weather.needs_umbrella(city)
-                    return message
-                except ValueError as e:
-                    return f"😅 {str(e)}"
-
-            elif tool_name == "set_reminder":
-                # minutes가 문자열로 올 수 있으므로 int 변환
+            # 리마인더는 별도 처리 (플러그인이 아님)
+            if tool_name == "set_reminder":
                 minutes_raw = arguments.get("minutes", "1")
                 try:
                     minutes_int = int(minutes_raw)
-                    if minutes_int <= 0 or minutes_int > 1440:  # 최대 24시간
+                    if minutes_int <= 0 or minutes_int > 1440:
                         return "⚠️ 알림 시간은 1분에서 24시간 사이로 설정해주세요."
                 except (ValueError, TypeError):
                     minutes_int = 1
@@ -154,25 +156,25 @@ class AIService:
                     message=arguments.get("message", "알림"),
                 )
 
-            elif tool_name == "get_schedule":
-                # 일정 조회
-                date_str = arguments.get("date", "today")
-                return self._get_schedule(date_str)
-
-            elif tool_name == "add_schedule":
-                # 일정 추가
-                title = arguments.get("title", "")
-                if not title:
-                    return "⚠️ 일정 제목을 입력해주세요."
-                date_str = arguments.get("date", "today")
-                time_str = arguments.get("time", "")
-                if not time_str:
-                    return "⚠️ 일정 시간을 입력해주세요."
-                location = arguments.get("location", "")
-                return self._add_schedule(title, date_str, time_str, location)
-
-            else:
+            # Registry를 통해 플러그인 찾기
+            plugin_name = TOOL_FUNCTION_TO_PLUGIN.get(tool_name)
+            if not plugin_name:
                 return f"알 수 없는 도구: {tool_name}"
+
+            plugin = self.registry.get(plugin_name)
+            if not plugin:
+                return f"{plugin_name} 서비스가 설정되지 않았습니다."
+
+            # 플러그인 execute 호출
+            result = await plugin.execute(function_name=tool_name, **arguments)
+
+            # 결과 포맷팅
+            if isinstance(result, dict):
+                if result.get("success"):
+                    return result.get("message", str(result))
+                else:
+                    return f"😅 {result.get('error', '알 수 없는 오류')}"
+            return str(result)
 
         except Exception as e:
             logger.error(f"도구 실행 오류: {e}", exc_info=True)
