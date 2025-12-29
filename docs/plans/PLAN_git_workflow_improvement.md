@@ -154,12 +154,12 @@ chore:    빌드, 패키지 등 유지보수
 **⚠️ STOP: Do NOT proceed to Phase 2 until ALL checks pass**
 
 **Verification**:
-- [x] `git push origin main` 시도 → 거부됨 확인 ✅
+- [x] `git push origin main` 시도 → 거부됨 확인
   - `GH006: Protected branch update failed`
   - `Changes must be made through a pull request`
   - `Required status check "test" is expected`
-- [x] GitHub에서 Branch Protection Rule 활성화 확인 ✅
-- [x] Required status check에 `test` 표시됨 ✅
+- [x] GitHub에서 Branch Protection Rule 활성화 확인
+- [x] Required status check에 `test` 표시됨
 
 ---
 
@@ -187,7 +187,7 @@ chore:    빌드, 패키지 등 유지보수
 #### Quality Gate ✋
 
 **Verification**:
-- [x] PR 템플릿 파일 존재 확인 ✅
+- [x] PR 템플릿 파일 존재 확인
 - [ ] 새 PR 생성 시 템플릿 자동 로드됨 (Phase 4에서 확인)
 - [ ] 테스트 PR 머지 후 브랜치 자동 삭제됨 (Phase 4에서 확인)
 
@@ -215,9 +215,9 @@ chore:    빌드, 패키지 등 유지보수
 #### Quality Gate ✋
 
 **Verification**:
-- [x] 워크플로우 문서 파일 존재 확인 ✅
-- [x] 문서 내용 검토 (명확하고 따라하기 쉬운지) ✅
-- [x] README에서 문서 링크 작동 확인 ✅
+- [x] 워크플로우 문서 파일 존재 확인
+- [x] 문서 내용 검토 (명확하고 따라하기 쉬운지)
+- [x] README에서 문서 링크 작동 확인
 
 ---
 
