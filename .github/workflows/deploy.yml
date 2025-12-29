@@ -24,10 +24,7 @@ jobs:
       run: docker compose down || true
     
     - name: Build and start container
-      run: docker compose up -d --build
-    
-    - name: Wait for startup
-      run: sleep 10
+      run: docker compose up -d --build --wait
     
     - name: Check deployment status
       run: |
