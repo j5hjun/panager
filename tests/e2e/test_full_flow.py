@@ -16,7 +16,7 @@ class TestFullConversationFlow:
         from src.services.llm.ai_service import AIService
 
         # Given: AI 서비스 초기화 (테스트용 설정)
-        ai_service = AIService(
+        _ai_service = AIService(
             api_key="test-key",
             base_url="https://api.groq.com/openai/v1",
             model="llama-3.3-70b-versatile",
@@ -82,7 +82,7 @@ class TestErrorHandling:
         from src.services.llm.ai_service import AIService
 
         # Given: 잘못된 API 키로 서비스 초기화
-        ai_service = AIService(
+        _ai_service = AIService(
             api_key="invalid-key",
             base_url="https://api.groq.com/openai/v1",
             model="llama-3.3-70b-versatile",

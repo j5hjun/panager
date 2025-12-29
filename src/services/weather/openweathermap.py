@@ -90,24 +90,30 @@ class WeatherService:
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
                 logger.error(f"도시를 찾을 수 없음: {city}")
-                raise ValueError(f"'{city}' 도시를 찾을 수 없습니다. 영문 도시명을 확인해주세요.")
+                raise ValueError(
+                    f"'{city}' 도시를 찾을 수 없습니다. 영문 도시명을 확인해주세요."
+                ) from e
             elif e.response.status_code == 401:
                 logger.error("날씨 API 키 인증 실패")
-                raise ValueError("날씨 API 키가 유효하지 않습니다.")
+                raise ValueError("날씨 API 키가 유효하지 않습니다.") from e
             elif e.response.status_code == 429:
                 logger.error("날씨 API 요청 제한 초과")
-                raise ValueError("날씨 API 요청 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요.")
+                raise ValueError(
+                    "날씨 API 요청 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요."
+                ) from e
             else:
                 logger.error(f"날씨 API 오류: {e}")
                 raise ValueError(
                     f"날씨 정보를 가져오는 중 오류가 발생했습니다: {e.response.status_code}"
-                )
+                ) from e
         except KeyError as e:
             logger.error(f"날씨 데이터 파싱 오류: {e}")
-            raise ValueError("날씨 데이터 형식이 올바르지 않습니다.")
+            raise ValueError("날씨 데이터 형식이 올바르지 않습니다.") from e
         except Exception as e:
             logger.error(f"날씨 조회 실패: {e}")
-            raise ValueError(f"날씨 조회 중 예상치 못한 오류가 발생했습니다: {str(e)}")
+            raise ValueError(
+                f"날씨 조회 중 예상치 못한 오류가 발생했습니다: {str(e)}"
+            ) from e
 
     async def get_weather_data(self, city: str | None = None) -> WeatherData:
         """

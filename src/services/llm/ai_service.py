@@ -176,7 +176,7 @@ class AIService:
 
         except Exception as e:
             logger.error(f"도구 실행 오류: {e}", exc_info=True)
-            return f"😅 죄송해요, 요청을 처리하는 중 문제가 발생했어요. 다시 시도해주세요."
+            return "😅 죄송해요, 요청을 처리하는 중 문제가 발생했어요. 다시 시도해주세요."
 
     def _set_reminder(self, user_id: str, minutes: int, message: str) -> str:
         """
