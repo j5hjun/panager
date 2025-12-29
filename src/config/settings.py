@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     openweathermap_api_key: str = Field(description="OpenWeatherMap API Key")
     default_city: str = Field(default="Seoul", description="기본 도시명")
 
+    # ==================== Kakao Maps API 설정 ====================
+    kakao_rest_api_key: str = Field(default="", description="Kakao REST API Key (길찾기용)")
+
     # ==================== AI 비서 설정 ====================
     assistant_name: str = Field(default="패니저", description="AI 비서 이름")
 
