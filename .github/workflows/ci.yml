@@ -3,21 +3,43 @@ name: CI
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
 
 jobs:
+  # 변경된 파일 감지 (항상 실행 - Branch Protection의 required check)
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_test: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for code changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - '**'
+              - '!**.md'
+              - '!docs/**'
+              - '!.gitignore'
+              - '!LICENSE'
+      
+      - name: Report
+        run: |
+          if [ "${{ steps.filter.outputs.code }}" == "true" ]; then
+            echo "💻 Code changes detected - tests will run"
+          else
+            echo "📝 Docs/config only - tests will be skipped"
+          fi
+
+  # 코드 변경 시에만 실행 (단, main push 시에는 항상 실행)
   test:
+    needs: check
+    # main push: 항상 실행 / PR: 코드 변경 시에만 실행
+    if: github.event_name == 'push' || needs.check.outputs.should_test == 'true'
     runs-on: ubuntu-latest
     
     steps:

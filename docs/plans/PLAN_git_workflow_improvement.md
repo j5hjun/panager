@@ -2,8 +2,8 @@
 
 **Status**: 🔄 In Progress
 **Started**: 2025-12-29
-**Last Updated**: 2025-12-29T20:46
-**Estimated Completion**: 2025-12-30 (1일)
+**Last Updated**: 2025-12-31T08:25
+**Estimated Completion**: 2025-12-31 (2일)
 
 ---
 
@@ -223,12 +223,12 @@ chore:    빌드, 패키지 등 유지보수
 
 ### Phase 4: 실제 워크플로우 테스트
 **Goal**: 새로운 워크플로우로 코드 변경을 수행하여 전체 프로세스 검증
-**Estimated Time**: 20분
-**Status**: ⏳ Pending
+**Estimated Time**: 40분 (추가 작업 포함)
+**Status**: 🔄 In Progress
 
 #### Tasks
 
-- [ ] **Task 4.1**: Feature Branch 생성 및 작업
+- [x] **Task 4.1**: Feature Branch 생성 및 작업
   ```bash
   git checkout -b feature/test-workflow
   # 작은 변경 (예: README에 배지 추가)
@@ -241,6 +241,21 @@ chore:    빌드, 패키지 등 유지보수
   - GitHub에서 PR 생성
   - CI 자동 실행 확인
   - CI 통과 확인
+  - ⚠️ **Blocker 발생**: paths-ignore로 인해 문서만 변경 시 CI 스킵됨
+
+- [ ] **Task 4.2.1**: CI 워크플로우 수정 (Blocker 해결) 🚨
+  - **문제**: paths-ignore 설정으로 .md, docs/** 파일만 변경 시 CI가 스킵됨
+  - **결과**: Branch Protection의 required status check test가 실행되지 않아 머지 불가
+  - **해결**: Job 분리 전략 적용
+  - File: .github/workflows/ci.yml
+  - 변경 내용:
+    - check job 추가: 항상 실행, Branch Protection에서 required로 설정
+    - test job 유지: paths-ignore 적용, 코드 변경 시에만 실행
+  - Branch Protection 수정: required status check을 test에서 check으로 변경
+
+- [ ] **Task 4.2.2**: Branch Protection Rule 수정
+  - GitHub Settings → Branches → main rule 편집
+  - Required status check: test 제거, check 추가
 
 - [ ] **Task 4.3**: PR 머지 및 정리
   - Squash and merge 실행
@@ -262,6 +277,8 @@ chore:    빌드, 패키지 등 유지보수
 
 **Final Verification**:
 - [ ] Feature branch에서 작업 → PR 생성 → CI 통과 → 머지 성공
+- [ ] 문서만 변경한 PR도 check job 통과로 머지 가능
+- [ ] 코드 변경 시 test job도 실행됨
 - [ ] 머지 후 브랜치 자동 삭제됨
 - [ ] main이 직접 푸시로부터 보호됨
 - [ ] 배포 자동 실행됨
@@ -276,6 +293,7 @@ chore:    빌드, 패키지 등 유지보수
 | 긴급 hotfix 지연 | Low | Medium | hotfix/ 브랜치 사용, 빠른 PR 머지 |
 | CI 실패로 머지 불가 | Medium | Medium | CI 문제 우선 해결, 필요시 임시 bypass |
 | 복잡한 워크플로우 | Low | Low | 문서화로 학습 비용 최소화 |
+| **paths-ignore로 CI 스킵** | **High** | **Medium** | **Job 분리 (check + test)** |
 
 ---
 
@@ -321,10 +339,17 @@ chore:    빌드, 패키지 등 유지보수
 - **Phase 3**: Git 워크플로우 가이드와 CONTRIBUTING.md 작성 완료. README에 링크 추가.
 
 ### Blockers Encountered
-- 없음 - 순조롭게 진행됨
+- **Phase 4 - Task 4.2**: paths-ignore 설정으로 인한 CI 스킵 문제
+  - **상황**: 문서(.md, docs/**)만 변경한 PR에서 CI의 test job이 스킵됨
+  - **문제**: Branch Protection에서 test를 required로 설정했는데, job이 실행되지 않아 "Expected" 상태로 머지 불가
+  - **해결 방안**: Job 분리 전략
+    - check job: 항상 실행, Branch Protection의 required check으로 설정
+    - test job: paths-ignore 적용, 코드 변경 시에만 실행
+  - **상태**: 해결 진행 중
 
 ### Improvements for Future Plans
-- [향후 개선 사항 기록]
+- CI 설계 시 paths-ignore와 Branch Protection의 상호작용 미리 고려 필요
+- 문서 전용 변경에 대한 CI 전략 사전 수립
 
 ---
 
@@ -353,5 +378,5 @@ chore:    빌드, 패키지 등 유지보수
 ---
 
 **Plan Status**: 🔄 In Progress
-**Next Action**: Phase 4 시작 - 실제 워크플로우 테스트 (Feature 브랜치 생성 → PR → 머지)
-**Blocked By**: None
+**Next Action**: Task 4.2.1 진행 - CI 워크플로우 Job 분리 수정
+**Blocked By**: CI paths-ignore로 인한 스킵 문제 (해결 중)

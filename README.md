@@ -21,7 +21,7 @@
   - Groq 또는 OpenAI API Key
   - OpenWeatherMap API Key
 
-### 설치
+### 설치 (개발 환경)
 
 ```bash
 # 1. 저장소 클론
@@ -37,6 +37,27 @@ cp .env.example .env
 # 4. 실행
 poetry run python -m src.main
 ```
+
+### 🐳 Docker 배포 (프로덕션)
+
+```bash
+# 1. 저장소 클론
+git clone https://github.com/j5hjun/panager.git
+cd panager
+
+# 2. 환경 변수 설정
+cp .env.example .env
+nano .env  # API 키 입력
+
+# 3. Docker로 실행
+docker compose up -d --build
+
+# 4. 상태 확인
+docker compose ps
+docker compose logs -f
+```
+
+**상세 배포 가이드**: [📚 배포 문서](./docs/DEPLOYMENT.md)
 
 ## 🔑 API 키 발급 가이드
 
@@ -230,6 +251,13 @@ TIMEZONE=Asia/Seoul
 1. Groq/OpenAI API 키가 유효한지 확인
 2. 인터넷 연결 상태 확인
 3. API 요청 제한 확인
+
+## 📚 문서
+
+- [배포 가이드](./docs/DEPLOYMENT.md) - Docker 배포, CI/CD, 트러블슈팅
+- [운영 가이드](./docs/OPERATIONS.md) - 모니터링, 로그, 백업, 긴급 대응
+- [Git 워크플로우](.agent/workflows/git-workflow.md) - 브랜치 전략, PR 가이드
+- [기여 가이드](./CONTRIBUTING.md) - 코드 기여 방법
 
 ## 📄 라이선스
 
