@@ -3,40 +3,78 @@ name: CI
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'LICENSE'
 
 jobs:
+  # 항상 실행되는 체크 (Branch Protection에서 이것을 required로 설정)
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: PR Ready Check
+        run: echo "✅ PR is ready for review"
+
+  # 코드 변경 시에만 실행되는 테스트
   test:
     runs-on: ubuntu-latest
+    # 문서/설정 파일만 변경된 경우 스킵
+    if: |
+      github.event_name == 'push' || 
+      (
+        !contains(github.event.pull_request.title, '[skip ci]') &&
+        github.event.pull_request.changed_files > 0
+      )
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    # 변경된 파일 확인 (문서만 변경되었는지 체크)
+    - name: Check for code changes
+      id: changes
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          # PR의 경우 변경된 파일 목록 확인
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+        else
+          # push의 경우 이전 커밋과 비교
+          CHANGED_FILES=$(git diff --name-only HEAD~1)
+        fi
+        
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
+        
+        # 코드 파일 변경 여부 확인 (.py, .toml 등)
+        CODE_CHANGES=$(echo "$CHANGED_FILES" | grep -E '\.(py|toml|yaml|yml|json|sh)$' | grep -v '\.github/' || true)
+        
+        if [ -z "$CODE_CHANGES" ]; then
+          echo "has_code_changes=false" >> $GITHUB_OUTPUT
+          echo "📝 Only documentation/config changes detected"
+        else
+          echo "has_code_changes=true" >> $GITHUB_OUTPUT
+          echo "💻 Code changes detected:"
+          echo "$CODE_CHANGES"
+        fi
     
     - name: Set up Python 3.11
+      if: steps.changes.outputs.has_code_changes == 'true'
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
     - name: Install Poetry
+      if: steps.changes.outputs.has_code_changes == 'true'
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
     
     - name: Configure Poetry
+      if: steps.changes.outputs.has_code_changes == 'true'
       run: poetry config virtualenvs.in-project true
     
     - name: Load cached venv
+      if: steps.changes.outputs.has_code_changes == 'true'
       id: cached-poetry-dependencies
       uses: actions/cache@v4
       with:
@@ -44,20 +82,28 @@ jobs:
         key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
     
     - name: Install dependencies
+      if: steps.changes.outputs.has_code_changes == 'true'
       run: poetry install --no-interaction --no-root
     
     - name: Run linting
+      if: steps.changes.outputs.has_code_changes == 'true'
       run: |
         poetry run ruff check .
         poetry run black --check .
     
     - name: Run tests with coverage
+      if: steps.changes.outputs.has_code_changes == 'true'
       run: |
         poetry run pytest tests/ -v --cov=src --cov-report=xml
     
     - name: Upload coverage to Codecov
+      if: steps.changes.outputs.has_code_changes == 'true'
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         fail_ci_if_error: false
+    
+    - name: Skip notice
+      if: steps.changes.outputs.has_code_changes == 'false'
+      run: echo "⏭️ Skipping tests - no code changes detected"
