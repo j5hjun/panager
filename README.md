@@ -50,11 +50,15 @@ cp .env.example .env
 nano .env  # API 키 입력
 
 # 3. Docker로 실행
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 
 # 4. 상태 확인
 docker compose ps
 docker compose logs -f
+
+# 선택: 이전 이미지 정리
+# docker image prune -f
 ```
 
 **상세 배포 가이드**: [📚 배포 문서](./docs/DEPLOYMENT.md)
