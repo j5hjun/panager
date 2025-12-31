@@ -57,10 +57,11 @@ cp .env.example .env
 nano .env  # API 키 입력
 ```
 
-### 3. Docker 이미지 빌드 및 실행
+### 3. Docker 이미지 Pull 및 실행
 
 ```bash
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
 ### 4. 상태 확인
@@ -92,11 +93,13 @@ docker compose logs -f
 ```
 main 브랜치 푸시
     ↓
-CI 워크플로우 (테스트)
+CI 워크플로우 (테스트 통과)
+    ↓
+Docker Build 워크플로우 (이미지 빌드 & ghcr.io 푸시)
     ↓
 Deploy 워크플로우 (셀프호스팅 러너)
     ↓
-docker compose up -d --build --wait
+docker compose pull → docker compose up -d → 이전 이미지 정리
 ```
 
 ---

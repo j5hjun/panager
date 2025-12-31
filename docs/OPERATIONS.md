@@ -60,7 +60,7 @@ logging:
 ### 자동 배포 (CI/CD)
 
 ```
-main 브랜치 푸시 → CI 통과 → 자동 배포
+main 브랜치 푸시 → CI 통과 → Docker Build (ghcr.io 푸시) → Deploy (pull & up)
 ```
 
 GitHub Actions 확인: https://github.com/j5hjun/panager/actions
@@ -70,14 +70,17 @@ GitHub Actions 확인: https://github.com/j5hjun/panager/actions
 ```bash
 cd ~/panager  # 또는 러너 작업 디렉토리
 git pull origin main
-docker compose down
-docker compose up -d --build
+docker compose pull
+docker compose up -d --wait
+docker image prune -f  # 이전 이미지 정리
 ```
 
 ### 무중단 업데이트
 
 ```bash
-docker compose up -d --build --wait
+docker compose pull
+docker compose up -d --wait
+docker image prune -f  # 이전 이미지 정리
 ```
 
 ---
@@ -87,13 +90,15 @@ docker compose up -d --build --wait
 ### 이전 버전으로 롤백
 
 ```bash
-# 특정 커밋으로 롤백
+# 특정 커밋으로 롤백 (로컬 빌드 필요 시)
 git checkout <commit-hash>
-docker compose up -d --build
+docker compose build
+docker compose up -d
 
 # main으로 복원
 git checkout main
-docker compose up -d --build
+docker compose pull
+docker compose up -d
 ```
 
 ### Docker 이미지 롤백

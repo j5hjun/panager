@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["Docker Build"]
     types:
       - completed
     branches: [ main ]
@@ -20,11 +20,13 @@ jobs:
         echo "${{ secrets.ENV_FILE }}" > .env
         chmod 600 .env
     
-    - name: Stop existing container
-      run: docker compose down || true
+    # 다운타임 최소화: 새 이미지 pull (서비스 계속 실행 중)
+    - name: Pull latest image
+      run: docker compose pull
     
-    - name: Build and start container
-      run: docker compose up -d --build --wait
+    # 빠르게 컨테이너 교체
+    - name: Deploy with minimal downtime
+      run: docker compose up -d --wait
     
     - name: Check deployment status
       run: |
@@ -40,3 +42,7 @@ jobs:
           docker compose ps
           exit 1
         fi
+    
+    # 사용하지 않는 이전 이미지 정리
+    - name: Cleanup old images
+      run: docker image prune -f

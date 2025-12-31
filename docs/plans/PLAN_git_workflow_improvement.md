@@ -2,8 +2,8 @@
 
 **Status**: 🔄 In Progress
 **Started**: 2025-12-29
-**Last Updated**: 2025-12-31T08:25
-**Estimated Completion**: 2025-12-31 (2일)
+**Last Updated**: 2025-12-31T09:18
+**Estimated Completion**: 2025-12-31
 
 ---
 
@@ -237,25 +237,104 @@ chore:    빌드, 패키지 등 유지보수
   git push -u origin feature/test-workflow
   ```
 
-- [ ] **Task 4.2**: PR 생성 및 CI 확인
+- [x] **Task 4.2**: PR 생성 및 CI 확인
   - GitHub에서 PR 생성
   - CI 자동 실행 확인
   - CI 통과 확인
   - ⚠️ **Blocker 발생**: paths-ignore로 인해 문서만 변경 시 CI 스킵됨
 
-- [ ] **Task 4.2.1**: CI 워크플로우 수정 (Blocker 해결) 🚨
+- [x] **Task 4.2.1**: CI 워크플로우 수정 (Blocker 해결) ✅
   - **문제**: paths-ignore 설정으로 .md, docs/** 파일만 변경 시 CI가 스킵됨
   - **결과**: Branch Protection의 required status check test가 실행되지 않아 머지 불가
-  - **해결**: Job 분리 전략 적용
+  - **해결**: Job 분리 전략 + dorny/paths-filter 적용
   - File: .github/workflows/ci.yml
   - 변경 내용:
-    - check job 추가: 항상 실행, Branch Protection에서 required로 설정
-    - test job 유지: paths-ignore 적용, 코드 변경 시에만 실행
+    - check job 추가: 항상 실행, dorny/paths-filter로 코드 변경 감지
+    - test job: main push 시 항상 실행, PR은 코드 변경 시에만 실행
   - Branch Protection 수정: required status check을 test에서 check으로 변경
 
-- [ ] **Task 4.2.2**: Branch Protection Rule 수정
+- [x] **Task 4.2.2**: Branch Protection Rule 수정
   - GitHub Settings → Branches → main rule 편집
   - Required status check: test 제거, check 추가
+
+- [x] **Task 4.2.3**: 배포 다운타임 최소화 (이미지 Pull 방식)
+  - **문제**: 배포 서버에서 `docker compose build` 하는 동안 서비스 다운
+  - **해결**: CI에서 이미지 빌드 & 레지스트리 푸시, 배포 서버에서는 Pull만
+  - **기존 워크플로우 활용**: `docker-build.yml` (ghcr.io에 이미지 푸시)
+  
+  - **수정 필요 파일들**:
+    1. `docker-compose.yml`: build → image 방식으로 변경
+       ```yaml
+       # Before
+       services:
+         panager:
+           build:
+             context: .
+             dockerfile: Dockerfile
+       
+       # After
+       services:
+         panager:
+           image: ghcr.io/j5hjun/panager:latest
+       ```
+    
+    2. `deploy.yml`: build 대신 pull + 이미지 정리
+       ```yaml
+       # Before
+       - docker compose down
+       - docker compose up -d --build --wait
+       
+       # After
+       - docker compose pull          # 새 이미지 다운로드 (서비스 유지)
+       - docker compose up -d --wait  # 빠르게 컨테이너 교체
+       - docker image prune -f        # 이전 이미지 정리
+       ```
+    
+    3. 워크플로우 연동: `ci.yml → docker-build.yml → deploy.yml`
+
+- [x] **Task 4.2.4**: 배포 문서 업데이트
+  - **File 1**: `docs/DEPLOYMENT.md`
+    - 배포 프로세스 섹션 업데이트 (이미지 Pull 방식 반영)
+    - "Docker 이미지 직접 Pull" 섹션을 기본 방식으로 변경
+    - CI/CD 프로세스 다이어그램 업데이트 (이미지 정리 단계 포함):
+      ```
+      main 브랜치 푸시
+          ↓
+      CI 워크플로우 (테스트 통과)
+          ↓
+      Docker Build 워크플로우 (이미지 빌드 & ghcr.io 푸시)
+          ↓
+      Deploy 워크플로우 (이미지 pull & 컨테이너 교체 & 이전 이미지 정리)
+      ```
+  
+  - **File 2**: `docs/OPERATIONS.md`
+    - "배포 및 업데이트" 섹션 업데이트 (58-82줄)
+    - 자동 배포 프로세스 다이어그램 수정
+    - 수동 배포 명령어 수정 (`--build` → `pull` + 이미지 정리)
+      ```bash
+      # Before
+      docker compose down
+      docker compose up -d --build
+      
+      # After
+      docker compose pull
+      docker compose up -d --wait
+      docker image prune -f  # 이전 이미지 정리
+      ```
+    - 무중단 업데이트 섹션에 이미지 정리 추가
+    - 롤백 섹션의 `--build` 명령어도 수정 (92, 96줄)
+  
+  - **File 3**: `README.md`
+    - 빠른 시작 섹션의 Docker 명령어 수정 (53줄)
+      ```bash
+      # Before
+      docker compose up -d --build
+      
+      # After  
+      docker compose pull
+      docker compose up -d
+      # 선택: docker image prune -f  (이전 이미지 정리)
+      ```
 
 - [ ] **Task 4.3**: PR 머지 및 정리
   - Squash and merge 실행
@@ -264,12 +343,14 @@ chore:    빌드, 패키지 등 유지보수
     ```bash
     git checkout main
     git pull
-    git branch -d feature/test-workflow
+    git branch -d ci/deploy-optimization
     ```
 
-- [ ] **Task 4.4**: 배포 확인
-  - deploy.yml 자동 실행 확인
-  - 프로덕션 서버 정상 동작 확인
+- [ ] **Task 4.4**: 배포 및 문서 확인
+  - docker-build.yml → 이미지 ghcr.io에 푸시 확인
+  - deploy.yml → 이미지 pull 후 배포 확인
+  - 다운타임 최소화 확인 (빌드 없이 pull만)
+  - `docs/DEPLOYMENT.md` 내용이 실제 프로세스와 일치하는지 확인
 
 #### Quality Gate ✋
 
@@ -281,7 +362,7 @@ chore:    빌드, 패키지 등 유지보수
 - [ ] 코드 변경 시 test job도 실행됨
 - [ ] 머지 후 브랜치 자동 삭제됨
 - [ ] main이 직접 푸시로부터 보호됨
-- [ ] 배포 자동 실행됨
+- [ ] 배포 시 다운타임 최소화됨 (이미지 pull만, 빌드 없음)
 
 ---
 
@@ -342,14 +423,22 @@ chore:    빌드, 패키지 등 유지보수
 - **Phase 4 - Task 4.2**: paths-ignore 설정으로 인한 CI 스킵 문제
   - **상황**: 문서(.md, docs/**)만 변경한 PR에서 CI의 test job이 스킵됨
   - **문제**: Branch Protection에서 test를 required로 설정했는데, job이 실행되지 않아 "Expected" 상태로 머지 불가
-  - **해결 방안**: Job 분리 전략
-    - check job: 항상 실행, Branch Protection의 required check으로 설정
-    - test job: paths-ignore 적용, 코드 변경 시에만 실행
-  - **상태**: 해결 진행 중
+  - **해결 방안**: Job 분리 전략 + dorny/paths-filter
+    - check job: 항상 실행, dorny/paths-filter로 코드 변경 감지
+    - test job: main push 시 항상 실행, PR은 코드 변경 시에만
+  - **상태**: ✅ 해결 완료 (PR #5 머지됨)
+
+- **Phase 4 - 배포 다운타임**: 서버에서 빌드 시 서비스 다운
+  - **상황**: `docker compose --build` 동안 서비스가 응답하지 않음
+  - **해결 방안**: 이미지 Pull 방식으로 변경
+    - CI에서 이미지 빌드 & ghcr.io 푸시 (docker-build.yml)
+    - 배포 서버에서는 pull만 수행
+  - **상태**: 🔄 진행 중
 
 ### Improvements for Future Plans
 - CI 설계 시 paths-ignore와 Branch Protection의 상호작용 미리 고려 필요
 - 문서 전용 변경에 대한 CI 전략 사전 수립
+- 배포 시 빌드와 pull 분리 전략 적용
 
 ---
 
@@ -359,9 +448,11 @@ chore:    빌드, 패키지 등 유지보수
 - [GitHub Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow)
+- [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 
 ### Related Files
-- `.github/workflows/ci.yml` - CI 워크플로우
+- `.github/workflows/ci.yml` - CI 워크플로우 (테스트, 린트)
+- `.github/workflows/docker-build.yml` - Docker 이미지 빌드 & 푸시
 - `.github/workflows/deploy.yml` - 배포 워크플로우
 
 ---
