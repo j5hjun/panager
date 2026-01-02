@@ -14,9 +14,12 @@ from src.core.logic.conversation import ConversationManager
 from src.core.prompts.panager_persona import get_system_prompt
 from src.core.tools.plugins import CalendarTool, DirectionsTool, WeatherTool
 from src.core.tools.registry import ToolRegistry
+from src.services.cache.sqlite_cache import CacheService
 from src.services.calendar.sqlite_calendar import CalendarService
+from src.services.directions.cached_directions import CachedDirectionsService
 from src.services.directions.kakao_maps import DirectionsService
 from src.services.llm.client import LLMClient
+from src.services.weather.cached_weather import CachedWeatherService
 from src.services.weather.openweathermap import WeatherService
 
 logger = logging.getLogger(__name__)
@@ -83,17 +86,26 @@ class AIService:
         self.registry = ToolRegistry()
         self.registry.clear()  # 기존 등록 도구 초기화
 
+        # 캐시 서비스 초기화
+        self.cache = CacheService(db_path="data/cache.db")
+        logger.info("캐시 서비스 초기화됨")
+
         # 날씨 서비스 및 도구 초기화 (옵션)
-        self.weather: WeatherService | None = None
+        self.weather: CachedWeatherService | WeatherService | None = None
         if weather_api_key:
-            self.weather = WeatherService(
+            base_weather = WeatherService(
                 api_key=weather_api_key,
                 default_city=default_city,
+            )
+            # 캐시 래퍼로 감싸기
+            self.weather = CachedWeatherService(
+                weather_service=base_weather,
+                cache_service=self.cache,
             )
             # WeatherTool 등록
             weather_tool = WeatherTool(weather_service=self.weather)
             self.registry.register(weather_tool)
-            logger.info("날씨 도구 등록됨")
+            logger.info("날씨 도구 등록됨 (캐시 TTL=1시간)")
 
         # 일정 서비스 및 도구 초기화
         self.calendar = CalendarService(db_path=calendar_db_path)
@@ -102,12 +114,17 @@ class AIService:
         logger.info("일정 도구 등록됨")
 
         # 길찾기 서비스 및 도구 초기화 (옵션)
-        self.directions: DirectionsService | None = None
+        self.directions: CachedDirectionsService | DirectionsService | None = None
         if kakao_api_key:
-            self.directions = DirectionsService(api_key=kakao_api_key)
+            base_directions = DirectionsService(api_key=kakao_api_key)
+            # 캐시 래퍼로 감싸기
+            self.directions = CachedDirectionsService(
+                directions_service=base_directions,
+                cache_service=self.cache,
+            )
             directions_tool = DirectionsTool(directions_service=self.directions)
             self.registry.register(directions_tool)
-            logger.info("길찾기 도구 등록됨")
+            logger.info("길찾기 도구 등록됨 (캐시 TTL=15분)")
 
         # 시스템 프롬프트
         self.system_prompt = get_system_prompt(assistant_name)
