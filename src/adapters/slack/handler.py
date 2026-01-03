@@ -2,7 +2,6 @@
 Slack Handler
 
 Slack Bot의 메시지 처리를 담당하는 핸들러입니다.
-DM, 멘션, 채널 메시지를 처리합니다.
 """
 
 import logging
@@ -20,10 +19,7 @@ class SlackHandler:
     """
     Slack 메시지 핸들러
 
-    지원하는 메시지 유형:
-    - DM (Direct Message): 1:1 개인 대화
-    - Mention: 채널에서 @멘션으로 호출
-    - Channel: 채널의 모든 메시지 모니터링
+    DM(Direct Message)을 통한 1:1 대화를 처리합니다.
     """
 
     def __init__(
@@ -47,7 +43,6 @@ class SlackHandler:
         self.message_callback = message_callback
 
         # Slack App 초기화
-        # token_verification_enabled=False로 설정하면 초기화 시 API 호출 안 함
         self.app = App(
             token=bot_token,
             token_verification_enabled=token_verification_enabled,
@@ -61,31 +56,17 @@ class SlackHandler:
     def _register_handlers(self) -> None:
         """Slack 이벤트 핸들러 등록"""
 
-        # DM 메시지 핸들러
         @self.app.event("message")
         def handle_message_event(event: dict, say: Callable, logger: Any) -> None:
-            """모든 메시지 이벤트 처리"""
-            # 봇 자신의 메시지는 무시
+            """메시지 이벤트 처리"""
             if self.is_bot_message(event):
                 return
 
             channel_type = event.get("channel_type", "")
 
             if channel_type == "im":
-                # DM 메시지
                 logger.info(f"DM 메시지 수신: {event.get('text', '')[:50]}")
                 self._handle_dm(event, say)
-            elif channel_type == "channel" or channel_type == "group":
-                # 채널 메시지 (모니터링)
-                logger.info(f"채널 메시지 수신: {event.get('text', '')[:50]}")
-                self._handle_channel(event)
-
-        # @멘션 핸들러
-        @self.app.event("app_mention")
-        def handle_app_mention(event: dict, say: Callable, logger: Any) -> None:
-            """@멘션 이벤트 처리"""
-            logger.info(f"멘션 수신: {event.get('text', '')[:50]}")
-            self._handle_mention(event, say)
 
     def _handle_dm(self, event: dict, say: Callable) -> None:
         """DM 메시지 처리"""
@@ -102,49 +83,11 @@ class SlackHandler:
 
         say(response)
 
-    def _handle_mention(self, event: dict, say: Callable) -> None:
-        """멘션 메시지 처리"""
-        text = self.extract_text(event)
-        user = event.get("user", "unknown")
-        channel = event.get("channel", "unknown")
-
-        logger.info(f"Mention from {user} in {channel}: {text}")
-
-        # 콜백이 있으면 사용, 없으면 기본 응답
-        if self.message_callback:
-            response = self.message_callback(
-                {"type": "mention", "text": text, "user": user, "channel": channel}
-            )
-        else:
-            response = f"👋 안녕하세요! 말씀하신 내용: {text}"
-
-        say(response)
-
-    def _handle_channel(self, event: dict) -> dict:
-        """채널 메시지 모니터링 (응답하지 않음)"""
-        text = event.get("text", "")
-        user = event.get("user", "unknown")
-        channel = event.get("channel", "unknown")
-
-        logger.info(f"Channel message from {user} in {channel}: {text[:50]}")
-
-        # 채널 메시지는 기본적으로 응답하지 않음
-        # 나중에 키워드 감지 등으로 선택적 응답 가능
-        return {"received": True, "text": text, "user": user, "channel": channel}
-
     # ==================== Public Methods (테스트용) ====================
 
     async def handle_message(self, event: dict, say: Callable) -> None:
         """DM 메시지 처리 (테스트용 public 메서드)"""
         self._handle_dm(event, say)
-
-    async def handle_mention(self, event: dict, say: Callable) -> None:
-        """멘션 메시지 처리 (테스트용 public 메서드)"""
-        self._handle_mention(event, say)
-
-    async def handle_channel_message(self, event: dict) -> dict:
-        """채널 메시지 처리 (테스트용 public 메서드)"""
-        return self._handle_channel(event)
 
     # ==================== Utility Methods ====================
 
