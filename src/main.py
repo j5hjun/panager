@@ -10,7 +10,6 @@ import sys
 
 from src.adapters.slack.handler import SlackHandler
 from src.config.settings import get_settings
-from src.core.logic.proactive_alert import ProactiveAlertGenerator
 from src.services.llm.ai_service import AIService
 from src.services.scheduler.scheduler import SchedulerService
 
@@ -38,7 +37,6 @@ def create_message_callback(ai_service: AIService):
         logger = logging.getLogger(__name__)
         logger.info(f"메시지 처리 중: {user_id} ({msg_type}): {text[:50]}...")
 
-        # 비동기 함수를 동기적으로 실행
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
@@ -49,34 +47,6 @@ def create_message_callback(ai_service: AIService):
         return response
 
     return callback
-
-
-def create_morning_briefing_job(
-    slack_handler: SlackHandler,
-    alert_generator: ProactiveAlertGenerator,
-    target_channel: str,
-):
-    """아침 브리핑 작업 생성"""
-
-    def send_morning_briefing():
-        """아침 브리핑 전송"""
-        logger = logging.getLogger(__name__)
-        logger.info("📢 아침 브리핑 전송 중...")
-
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        # 브리핑 생성
-        briefing = loop.run_until_complete(alert_generator.generate_morning_briefing())
-
-        # Slack으로 전송
-        slack_handler.send_message(target_channel, briefing)
-        logger.info(f"✅ 아침 브리핑 전송 완료: {target_channel}")
-
-    return send_morning_briefing
 
 
 def main() -> None:
@@ -113,27 +83,9 @@ def main() -> None:
         message_callback=message_callback,
     )
 
-    # 능동적 알림 생성기 초기화
-    alert_generator = ProactiveAlertGenerator(
-        weather_service=ai_service.weather,
-        llm_client=ai_service.llm,
-        calendar_service=ai_service.calendar,
-        default_city=settings.default_city,
-    )
-
     # 스케줄러 초기화
     logger.info("⏰ 스케줄러 초기화 중...")
     scheduler = SchedulerService()
-
-    # 아침 브리핑 작업 등록 (매일 아침 8시)
-    if settings.slack_channel_id:
-        morning_job = create_morning_briefing_job(
-            slack_handler, alert_generator, target_channel=settings.slack_channel_id
-        )
-        scheduler.add_cron_job("morning_briefing", morning_job, hour=8, minute=0)
-        logger.info(f"📢 아침 브리핑 등록 완료 (매일 08:00 → {settings.slack_channel_id})")
-    else:
-        logger.warning("⚠️ SLACK_CHANNEL_ID 미설정 - 아침 브리핑 비활성화")
 
     # AIService에 스케줄러 연동 (리마인더 기능용)
     ai_service.set_scheduler(scheduler, slack_handler.send_message)
