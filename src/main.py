@@ -2,7 +2,7 @@
 통합형 능동적 AI 비서 "패니저" - 메인 진입점
 
 이 모듈은 애플리케이션의 시작점입니다.
-v2.0: 자율 판단 시스템 모듈 구현 완료 (유동적 실행 주기는 P-011에서 구현 예정)
+v2.0: 자율 판단 시스템 + 메모리 시스템 (P-010, P-011)
 """
 
 import asyncio
@@ -11,6 +11,8 @@ import sys
 
 from src.adapters.slack.handler import SlackHandler
 from src.config.settings import get_settings
+from src.core.autonomous.memory.memory_manager import MemoryManager
+from src.core.autonomous.scheduler.adaptive_scheduler import AdaptiveScheduler
 from src.services.llm.ai_service import AIService
 from src.services.scheduler.scheduler import SchedulerService
 
@@ -61,6 +63,11 @@ def main() -> None:
     logger.info(f"🧠 LLM Model: {settings.llm_model}")
     logger.info(f"🌍 Default City: {settings.default_city}")
 
+    # P-011: 메모리 시스템 초기화
+    logger.info("🧠 메모리 시스템 초기화 중...")
+    memory_manager = MemoryManager(db_path="data/memory.db")
+    logger.info("✅ 메모리 시스템 초기화 완료")
+
     # AI 서비스 초기화
     logger.info("🧠 AI 서비스 초기화 중...")
     ai_service = AIService(
@@ -76,12 +83,13 @@ def main() -> None:
     # 메시지 콜백 생성
     message_callback = create_message_callback(ai_service)
 
-    # Slack Bot 초기화
+    # Slack Bot 초기화 (P-011: 메모리 매니저 연동)
     logger.info("🔌 Slack Bot 연결 중...")
     slack_handler = SlackHandler(
         bot_token=settings.slack_bot_token,
         app_token=settings.slack_app_token,
         message_callback=message_callback,
+        memory_manager=memory_manager,
     )
 
     # 스케줄러 초기화
@@ -92,9 +100,13 @@ def main() -> None:
     ai_service.set_scheduler(scheduler, slack_handler.send_message)
     logger.info("🔗 리마인더 기능 활성화됨")
 
-    # 자율 판단 시스템 (P-010) 구현 완료
-    # 유동적 실행 주기 (사용자 데이터 기반)는 P-011 메모리 시스템에서 구현 예정
-    logger.info("🤖 자율 판단 시스템 모듈 로드 완료 (유동적 실행은 P-011에서 구현)")
+    # P-011: 유동적 스케줄러 초기화
+    logger.info("🔄 유동적 스케줄러 초기화 중...")
+    adaptive_scheduler = AdaptiveScheduler(memory_manager=memory_manager)
+
+    # 활성 사용자 조회 및 상태 로깅
+    status = adaptive_scheduler.get_status()
+    logger.info(f"📊 스케줄러 상태: 활성 사용자 {status['active_users']}명")
 
     # 스케줄러 시작
     scheduler.start()
@@ -109,6 +121,7 @@ def main() -> None:
     except KeyboardInterrupt:
         logger.info(f"👋 {settings.assistant_name} 종료...")
         scheduler.stop()
+        memory_manager.close()
 
 
 if __name__ == "__main__":

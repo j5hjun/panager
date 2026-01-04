@@ -4,20 +4,35 @@ Reflect 노드
 행동 결과를 분석하고 교훈을 추출합니다.
 - 사용자 반응 분석
 - LLM을 통한 교훈 추출
-- 교훈 저장 (메모리 기반, TODO: P-011에서 DB로 전환)
+- 교훈 저장 (P-011: SQLite DB)
 """
 
 import json
 import logging
 from datetime import datetime
 
+from src.core.autonomous.memory.lesson_repository import LessonRepository
 from src.core.autonomous.prompts.reflect import REFLECT_PROMPT
 from src.core.autonomous.state import AgentState
 
 logger = logging.getLogger(__name__)
 
-# 교훈 저장소 (메모리 기반, TODO: P-011에서 DB로 전환)
-_lessons: list[dict] = []
+# 교훈 저장소 (싱글톤)
+_lesson_repository: LessonRepository | None = None
+
+
+def _get_lesson_repository() -> LessonRepository:
+    """교훈 저장소 싱글톤 반환"""
+    global _lesson_repository
+    if _lesson_repository is None:
+        _lesson_repository = LessonRepository(db_path=":memory:")
+    return _lesson_repository
+
+
+def set_lesson_repository(repository: LessonRepository) -> None:
+    """교훈 저장소 설정 (DI용)"""
+    global _lesson_repository
+    _lesson_repository = repository
 
 
 def reflect_node(state: AgentState) -> AgentState:
@@ -161,42 +176,39 @@ async def _extract_lesson(
     user_reaction: str | None,
     llm_client,
 ) -> dict | None:
-    """LLM을 통해 교훈 추출"""
-    action = state.get("action", {})
+    """LLM을 사용하여 교훈 추출"""
     action_result = state.get("action_result", {})
+    action = state.get("action", {})
 
+    # 프롬프트 구성
     prompt = REFLECT_PROMPT.format(
         action_type=action.get("type", "unknown"),
         message=action.get("message", ""),
-        sent_at=action_result.get("timestamp", ""),
-        time_period=state.get("time_period", ""),
-        weather=state.get("weather", {}),
-        schedule=state.get("upcoming_schedule", {}),
-        user_reaction=user_reaction or "무응답",
+        sent_at=action_result.get("timestamp", "unknown"),
+        time_period=state.get("time_period", "unknown"),
+        weather=state.get("weather_context", {}).get("description", "unknown"),
+        schedule=str(state.get("schedule_context", [])),
+        user_reaction=user_reaction or "응답 없음",
     )
 
-    try:
-        messages = [{"role": "user", "content": prompt}]
-        response = await llm_client.chat(messages, temperature=0.3, max_tokens=512)
+    # LLM 호출
+    response = await llm_client.chat_async(prompt)
 
-        return _parse_lesson_response(response)
-
-    except Exception as e:
-        logger.error(f"[Reflect] LLM 호출 실패: {e}")
-        return None
+    # 응답 파싱
+    return _parse_lesson_response(response)
 
 
 def _parse_lesson_response(response: str) -> dict | None:
-    """LLM 응답을 교훈으로 파싱"""
+    """LLM 응답에서 교훈 추출"""
     try:
-        # JSON 블록 추출
+        # JSON 부분 추출
         if "```json" in response:
             start = response.find("```json") + 7
             end = response.find("```", start)
             json_str = response[start:end].strip()
-        elif "```" in response:
-            start = response.find("```") + 3
-            end = response.find("```", start)
+        elif "{" in response:
+            start = response.find("{")
+            end = response.rfind("}") + 1
             json_str = response[start:end].strip()
         else:
             json_str = response.strip()
@@ -228,30 +240,42 @@ def _parse_lesson_response(response: str) -> dict | None:
 
 
 def _save_lesson(lesson: dict) -> None:
-    """교훈 저장"""
-    _lessons.append(lesson)
+    """교훈 저장 (Repository 사용)"""
+    repo = _get_lesson_repository()
 
-    # 최대 50개 유지
-    if len(_lessons) > 50:
-        _lessons.pop(0)
+    # 교훈 내용 구성
+    content = f"{lesson.get('should_not', '')} -> {lesson.get('should_instead', '')}"
+    context = {
+        "context": lesson.get("context", ""),
+        "importance": lesson.get("importance", "medium"),
+        "analysis": lesson.get("analysis", ""),
+    }
+    user_reaction = lesson.get("reaction_type", "negative")
 
-    logger.info(f"[Reflect] 교훈 저장 완료 (총 {len(_lessons)}개)")
+    repo.save(content=content, context=context, user_reaction=user_reaction)
+    logger.info("[Reflect] 교훈 저장 완료 (DB)")
 
 
 def get_lessons() -> list[dict]:
     """저장된 교훈 조회"""
-    return _lessons.copy()
+    repo = _get_lesson_repository()
+    return repo.get_all()
 
 
 def get_relevant_lessons(context: str | None = None) -> list[dict]:
     """관련 교훈 조회 (TODO: 의미 기반 검색)"""
-    if not context:
-        return _lessons[-5:] if len(_lessons) > 5 else _lessons.copy()
+    repo = _get_lesson_repository()
 
-    # 현재는 최근 5개 반환 (P-011에서 벡터 검색 구현)
-    return _lessons[-5:] if len(_lessons) > 5 else _lessons.copy()
+    if not context:
+        return repo.get_recent(limit=5)
+
+    # 현재는 최근 5개 반환 (향후 벡터 검색 구현)
+    return repo.get_recent(limit=5)
 
 
 def clear_lessons() -> None:
     """교훈 초기화 (테스트용)"""
-    _lessons.clear()
+    global _lesson_repository
+    if _lesson_repository:
+        _lesson_repository.close()
+    _lesson_repository = LessonRepository(db_path=":memory:")
