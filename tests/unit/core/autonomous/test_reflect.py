@@ -49,17 +49,19 @@ class TestParseLessonResponse:
 
     def test_parse_valid_lesson(self):
         """정상 교훈 파싱"""
-        response = json.dumps({
-            "reaction_type": "negative",
-            "analysis": "사용자가 불편해함",
-            "should_save_lesson": True,
-            "lesson": {
-                "context": "아침 7시에 알림",
-                "should_not": "너무 이른 시간에 알림하면 안됨",
-                "should_instead": "8시 이후에 알림",
-                "importance": "high",
+        response = json.dumps(
+            {
+                "reaction_type": "negative",
+                "analysis": "사용자가 불편해함",
+                "should_save_lesson": True,
+                "lesson": {
+                    "context": "아침 7시에 알림",
+                    "should_not": "너무 이른 시간에 알림하면 안됨",
+                    "should_instead": "8시 이후에 알림",
+                    "importance": "high",
+                },
             }
-        })
+        )
 
         result = _parse_lesson_response(response)
 
@@ -69,12 +71,14 @@ class TestParseLessonResponse:
 
     def test_parse_no_save_needed(self):
         """저장 불필요 시 None 반환"""
-        response = json.dumps({
-            "reaction_type": "positive",
-            "analysis": "사용자가 만족함",
-            "should_save_lesson": False,
-            "lesson": None,
-        })
+        response = json.dumps(
+            {
+                "reaction_type": "positive",
+                "analysis": "사용자가 만족함",
+                "should_save_lesson": False,
+                "lesson": None,
+            }
+        )
 
         result = _parse_lesson_response(response)
 
@@ -242,17 +246,19 @@ class TestReflectNodeAsync:
         state["time_period"] = "morning"
 
         mock_llm = AsyncMock()
-        mock_llm.chat.return_value = json.dumps({
-            "reaction_type": "negative",
-            "analysis": "너무 이른 알림",
-            "should_save_lesson": True,
-            "lesson": {
-                "context": "아침 일찍 알림",
-                "should_not": "7시 전에 알림",
-                "should_instead": "8시 이후 알림",
-                "importance": "high",
+        mock_llm.chat.return_value = json.dumps(
+            {
+                "reaction_type": "negative",
+                "analysis": "너무 이른 알림",
+                "should_save_lesson": True,
+                "lesson": {
+                    "context": "아침 일찍 알림",
+                    "should_not": "7시 전에 알림",
+                    "should_instead": "8시 이후 알림",
+                    "importance": "high",
+                },
             }
-        })
+        )
 
         result = await reflect_node_async(
             state,

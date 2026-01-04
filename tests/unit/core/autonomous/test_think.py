@@ -64,9 +64,7 @@ class TestBuildPrompt:
             "is_quiet_hours": False,
             "weather": {"description": "맑음"},
             "needs_umbrella": False,
-            "today_schedules": [
-                {"start_time": "2026-01-04T14:00:00", "title": "미팅"}
-            ],
+            "today_schedules": [{"start_time": "2026-01-04T14:00:00", "title": "미팅"}],
             "upcoming_schedule": {"title": "미팅"},
             "minutes_to_next": 240,
             "today_notification_count": 2,
@@ -93,12 +91,14 @@ class TestParseLLMResponse:
 
     def test_parse_valid_json(self):
         """정상 JSON 파싱"""
-        response = json.dumps({
-            "reasoning": "비가 예보됨",
-            "decision": "act",
-            "confidence": 0.85,
-            "action": {"type": "notify", "message": "우산 챙기세요!"}
-        })
+        response = json.dumps(
+            {
+                "reasoning": "비가 예보됨",
+                "decision": "act",
+                "confidence": 0.85,
+                "action": {"type": "notify", "message": "우산 챙기세요!"},
+            }
+        )
         result = _parse_llm_response(response)
 
         assert result["decision"] == "act"
@@ -171,12 +171,14 @@ class TestThinkNode:
         state["today_notification_count"] = 0
 
         mock_llm = AsyncMock()
-        mock_llm.chat.return_value = json.dumps({
-            "reasoning": "비 예보가 있고 외출 일정이 있음",
-            "decision": "act",
-            "confidence": 0.9,
-            "action": {"type": "notify", "message": "우산 챙기세요!"}
-        })
+        mock_llm.chat.return_value = json.dumps(
+            {
+                "reasoning": "비 예보가 있고 외출 일정이 있음",
+                "decision": "act",
+                "confidence": 0.9,
+                "action": {"type": "notify", "message": "우산 챙기세요!"},
+            }
+        )
 
         result = await think_node_async(state, llm_client=mock_llm)
 
@@ -192,12 +194,14 @@ class TestThinkNode:
         state["today_notification_count"] = 0
 
         mock_llm = AsyncMock()
-        mock_llm.chat.return_value = json.dumps({
-            "reasoning": "잘 모르겠음",
-            "decision": "act",
-            "confidence": 0.5,  # 0.7 미만
-            "action": {"type": "notify", "message": "테스트"}
-        })
+        mock_llm.chat.return_value = json.dumps(
+            {
+                "reasoning": "잘 모르겠음",
+                "decision": "act",
+                "confidence": 0.5,  # 0.7 미만
+                "action": {"type": "notify", "message": "테스트"},
+            }
+        )
 
         result = await think_node_async(state, llm_client=mock_llm)
 

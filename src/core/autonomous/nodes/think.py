@@ -82,9 +82,7 @@ async def think_node_async(
             result["decision"] = "wait"
             result["reasoning"] += " (신뢰도 부족으로 wait 결정)"
 
-        logger.info(
-            f"[Think] 판단 결과: {result['decision']} (신뢰도: {result['confidence']:.2f})"
-        )
+        logger.info(f"[Think] 판단 결과: {result['decision']} (신뢰도: {result['confidence']:.2f})")
 
         return {
             **state,
@@ -176,9 +174,9 @@ def _build_prompt(state: AgentState) -> str:
     notification_count = state.get("today_notification_count", 0)
 
     return THINK_PROMPT.format(
-        current_time=state.get("current_time", "").isoformat()[:16]
-        if state.get("current_time")
-        else "",
+        current_time=(
+            state.get("current_time", "").isoformat()[:16] if state.get("current_time") else ""
+        ),
         time_period=state.get("time_period", ""),
         is_quiet_hours=state.get("is_quiet_hours", False),
         weather_description=weather_desc,

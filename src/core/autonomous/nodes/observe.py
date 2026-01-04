@@ -79,7 +79,9 @@ async def observe_node_async(
             weather = weather_data
             umbrella_result = await weather_service.needs_umbrella()
             needs_umbrella = umbrella_result[0]
-            logger.info(f"[Observe] 날씨: {weather.get('description', 'N/A')}, 우산: {needs_umbrella}")
+            logger.info(
+                f"[Observe] 날씨: {weather.get('description', 'N/A')}, 우산: {needs_umbrella}"
+            )
         except Exception as e:
             logger.warning(f"[Observe] 날씨 정보 수집 실패: {e}")
 
@@ -100,7 +102,9 @@ async def observe_node_async(
                     minutes_to_next = int((schedule.start_time - now).total_seconds() / 60)
                     break
 
-            logger.info(f"[Observe] 오늘 일정: {len(today_schedules)}개, 다음 일정: {minutes_to_next}분 후")
+            logger.info(
+                f"[Observe] 오늘 일정: {len(today_schedules)}개, 다음 일정: {minutes_to_next}분 후"
+            )
         except Exception as e:
             logger.warning(f"[Observe] 일정 정보 수집 실패: {e}")
 
