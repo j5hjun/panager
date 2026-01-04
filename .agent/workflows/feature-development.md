@@ -6,7 +6,18 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 
 새로운 기능을 개발할 때 따라야 할 전체 프로세스입니다.
 
-## 1. 요구사항 정의서 확인/작성
+## 1. 브랜치 생성
+
+모든 작업(문서 작성 포함)은 피처 브랜치에서 진행해야 합니다.
+
+1. **계획서 ID 확인**: `docs/plans/PLAN_master.md`에서 다음 사용 가능한 ID 확인 (예: P-005)
+2. **브랜치 생성**:
+   ```bash
+   git checkout -b feat/[계획서ID]-[기능명]
+   # 예: git checkout -b feat/p-005-calendar-integration
+   ```
+
+## 2. 요구사항 정의서 확인/작성
 
 기능 개발 전 요구사항이 정의되어 있는지 확인합니다.
 
@@ -14,7 +25,7 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 - **신규 작성 필요 시**: IEEE 830 표준 기반으로 SRS 작성
 - **요구사항 ID 확인**: 구현할 기능의 FR-XXX 또는 NFR-XXX ID 파악
 
-## 2. 통합 계획서 확인
+## 3. 통합 계획서 확인
 
 // turbo
 ```bash
@@ -23,9 +34,8 @@ cat docs/plans/PLAN_master.md | head -150
 
 - **현황 파악**: 전체 프로젝트 진행 상황 확인
 - **의존성 확인**: 시작하려는 작업의 선행 조건이 충족되었는지 확인
-- **계획서 ID 확인**: 다음 사용 가능한 ID 파악 (P-005, P-006, ...)
 
-## 3. 기능 계획서 작성
+## 4. 기능 계획서 작성
 
 **참조 문서**:
 - `docs/tamplates/SKILL.md` - 계획서 작성 가이드 (TDD, Quality Gate, Phase 구조)
@@ -47,7 +57,7 @@ cat docs/plans/PLAN_master.md | head -150
 - 의존성 그래프에 추가
 - 마일스톤에 연결 (해당 시)
 
-## 4. 기능 계획서 기반으로 구현
+## 5. 기능 계획서 기반으로 구현
 
 각 Phase별로 순차 진행:
 
@@ -68,22 +78,37 @@ poetry run pytest tests/ -v --tb=short
 ```
 
 **체크리스트**:
+- [ ] **계획서 정합성 검토**: 구현 결과가 계획서의 내용(설계, 요구사항)과 정확히 일치하는지 확인
 - [ ] 모든 Task 체크박스 완료
 - [ ] Quality Gate 모든 항목 통과
 - [ ] 계획서 "Last Updated" 날짜 업데이트
 - [ ] Phase 상태를 ✅ Complete로 변경
 
-## 5. Git 워크플로우
+## 6. CI 사전 검증 (모든 Phase 완료 후)
 
-**브랜치 생성**:
+모든 페이즈가 완료되면, PR 생성 전 로컬 환경에서 CI 요구사항을 충족하는지 최종 확인합니다.
+
+// turbo
 ```bash
-git checkout -b feat/[계획서ID]-[기능명]
-# 예: git checkout -b feat/p-010-autonomous-core
+# CI 설정 확인 (lint, test 등 스텝 확인)
+cat .github/workflows/ci.yml
 ```
+
+**수동 검증 실행**: 위 파일에 정의된 스크립트(pytest, ruff 등)를 로컬에서 모두 실행하여 에러가 없는지 확인합니다.
+
+## 7. Git 커밋 및 푸시
+
+반복적인 커밋과 푸시를 통해 작업을 저장합니다.
 
 **커밋**:
 ```bash
-git add -A
+# 변경된 파일 확인
+git status
+
+# 의도한 파일만 명시적으로 지정하여 스테이징 (전체 추가 지양)
+git add [파일경로1] [파일경로2]
+# 예: git add src/main.py tests/test_main.py
+
 git commit -m "feat: [계획서ID] [변경 내용 요약]
 
 - 변경사항 1
@@ -97,7 +122,13 @@ git commit -m "feat: [계획서ID] [변경 내용 요약]
 git push -u origin feat/[계획서ID]-[기능명]
 ```
 
-## 6. PR 생성
+## 8. PR 생성
+
+**PR 제목 형식**:
+```
+feat: [계획서ID] [기능 요약]
+# 예: feat: P-013 외부 캘린더 연동 (Google/iCloud)
+```
 
 **PR 템플릿** (`.github/pull_request_template.md`):
 
@@ -123,7 +154,7 @@ git push -u origin feat/[계획서ID]-[기능명]
 추가 정보
 ```
 
-## 7. 머지 후 정리
+## 9. 머지 후 정리
 
 - **통합 계획서 업데이트**: 진행률, 상태 변경
 - **main 브랜치 동기화**:
