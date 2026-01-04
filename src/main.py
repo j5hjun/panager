@@ -3,14 +3,24 @@
 
 이 모듈은 애플리케이션의 시작점입니다.
 v2.0: 자율 판단 시스템 + 메모리 시스템 (P-010, P-011)
+v2.1: 다중 사용자 시스템 (P-014)
 """
 
 import asyncio
 import logging
+import os
 import sys
+import threading
 
+from src.adapters.oauth.server import create_oauth_app
 from src.adapters.slack.handler import SlackHandler
+from src.adapters.slack.oauth_commands import SlackOAuthCommands
 from src.config.settings import get_settings
+from src.core.auth.oauth_service import OAuthService
+
+# P-014: OAuth 모듈
+from src.core.auth.token_repository import TokenRepository
+from src.core.auth.token_scheduler import TokenRefreshScheduler
 from src.core.autonomous.memory.memory_manager import MemoryManager
 from src.core.autonomous.scheduler.adaptive_scheduler import AdaptiveScheduler
 from src.services.llm.ai_service import AIService
@@ -52,6 +62,19 @@ def create_message_callback(ai_service: AIService):
     return callback
 
 
+def start_oauth_server(oauth_service: OAuthService, port: int = 8080) -> None:
+    """OAuth 콜백 서버 시작 (백그라운드 스레드)"""
+    import uvicorn
+
+    app = create_oauth_app(oauth_service)
+
+    def run_server():
+        uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
+
+    thread = threading.Thread(target=run_server, daemon=True)
+    thread.start()
+
+
 def main() -> None:
     """애플리케이션 메인 함수"""
     setup_logging()
@@ -67,6 +90,42 @@ def main() -> None:
     logger.info("🧠 메모리 시스템 초기화 중...")
     memory_manager = MemoryManager(db_path="data/memory.db")
     logger.info("✅ 메모리 시스템 초기화 완료")
+
+    # P-014: OAuth 시스템 초기화
+    logger.info("🔐 OAuth 시스템 초기화 중...")
+    encryption_key = os.getenv("ENCRYPTION_KEY")
+    google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+    google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    oauth_redirect_uri = os.getenv("OAUTH_REDIRECT_URI", "http://localhost:8080/oauth/callback")
+
+    token_repository = TokenRepository(
+        db_path="data/auth.db",
+        encryption_key=encryption_key,
+    )
+
+    oauth_service = OAuthService(
+        token_repository=token_repository,
+        google_client_id=google_client_id,
+        google_client_secret=google_client_secret,
+        redirect_uri=oauth_redirect_uri,
+    )
+
+    # 토큰 갱신 스케줄러
+    token_scheduler = TokenRefreshScheduler(
+        token_repository=token_repository,
+        oauth_service=oauth_service,
+        check_interval_minutes=5,
+    )
+    token_scheduler.start()
+    logger.info("✅ OAuth 시스템 초기화 완료")
+
+    # OAuth 콜백 서버 시작 (8080 포트)
+    if google_client_id:
+        logger.info("🌐 OAuth 콜백 서버 시작 (포트: 8080)...")
+        start_oauth_server(oauth_service, port=8080)
+        logger.info("✅ OAuth 콜백 서버 시작됨")
+    else:
+        logger.warning("⚠️ GOOGLE_CLIENT_ID 미설정, OAuth 서버 비활성화")
 
     # AI 서비스 초기화
     logger.info("🧠 AI 서비스 초기화 중...")
@@ -91,6 +150,15 @@ def main() -> None:
         message_callback=message_callback,
         memory_manager=memory_manager,
     )
+
+    # P-014: Slack OAuth 명령어 등록
+    logger.info("📎 OAuth 명령어 등록 중...")
+    oauth_commands = SlackOAuthCommands(
+        oauth_service=oauth_service,
+        token_repository=token_repository,
+    )
+    oauth_commands.register_commands(slack_handler.app)
+    logger.info("✅ OAuth 명령어 등록 완료 (/connect, /disconnect, /accounts)")
 
     # 스케줄러 초기화
     logger.info("⏰ 스케줄러 초기화 중...")
@@ -121,6 +189,8 @@ def main() -> None:
     except KeyboardInterrupt:
         logger.info(f"👋 {settings.assistant_name} 종료...")
         scheduler.stop()
+        token_scheduler.stop()
+        token_repository.close()
         memory_manager.close()
 
 
