@@ -54,8 +54,27 @@
 |----------|-----------|------------|
 | SQLite + 암호화 | 단순, 기존 인프라 활용 | 대규모 확장 시 DB 교체 필요 |
 | Fernet 대칭키 암호화 | 표준적, cryptography 라이브러리 | 키 관리 필요 |
-| 슬래시 명령어 + OAuth URL | UX 간편, 별도 웹서버 불필요 | OAuth 콜백 처리 복잡 |
+| **FastAPI OAuth 콜백 서버** | 자동 연동, 좋은 UX | 포트 오픈 필요 (8080) |
 | APScheduler 토큰 갱신 | 기존 스케줄러 활용 | 실시간성은 부족 |
+
+### 아키텍처 다이어그램
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     panager 컨테이너                            │
+│                                                                 │
+│  ┌──────────────────┐     ┌──────────────────┐                  │
+│  │   Slack Bot      │     │  FastAPI OAuth   │                  │
+│  │   (Socket Mode)  │     │  :8080           │                  │
+│  └────────┬─────────┘     └────────┬─────────┘                  │
+│           │                        │                            │
+│           │    ┌───────────────────┘                            │
+│           ▼    ▼                                                │
+│  ┌──────────────────────────────────────────┐                   │
+│  │           TokenRepository                 │                   │
+│  │     (SQLite + Fernet 암호화)              │                   │
+│  └──────────────────────────────────────────┘                   │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -63,10 +82,12 @@
 
 ### Required Before Starting
 - [x] P-011 메모리 시스템 완료
+- [ ] 배포 서버 8080 포트 오픈
+- [ ] OAuth redirect_uri 도메인 설정
 
 ### External Dependencies
 ```bash
-poetry add cryptography
+poetry add cryptography fastapi uvicorn
 ```
 
 ---
@@ -134,32 +155,50 @@ tests/integration/
 
 ---
 
-### Phase 2: OAuth 연결 서비스
-**Goal**: Google/iCloud OAuth 인증 흐름 구현
-**Estimated Time**: 4시간
+### Phase 2: OAuth 연결 서비스 + FastAPI 콜백 서버
+**Goal**: FastAPI 웹서버로 OAuth 콜백 자동 처리
+**Estimated Time**: 5시간
 **Status**: ⏳ Pending
 
 #### Tasks
 
 **🔴 RED: Write Failing Tests First**
 - [ ] **Test 2.1**: OAuthService 테스트
-  - `test_generate_auth_url`: 인증 URL 생성
+  - `test_generate_auth_url`: 인증 URL 생성 (state 파라미터 포함)
   - `test_exchange_code`: 인증 코드 → 토큰 교환
   - `test_refresh_token`: 토큰 갱신
   - `test_revoke_token`: 토큰 해지
 
+- [ ] **Test 2.2**: OAuth 콜백 엔드포인트 테스트
+  - `test_callback_success`: 정상 콜백 처리
+  - `test_callback_invalid_state`: 잘못된 state 거부
+  - `test_callback_error`: OAuth 에러 처리
+
 **🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 2.2**: OAuthService 구현
+- [ ] **Task 2.3**: OAuthService 구현
   - File: `src/core/auth/oauth_service.py`
   - Google OAuth 2.0 클라이언트
+  - state 파라미터로 user_id 전달
   - iCloud 앱 비밀번호 인증
 
-- [ ] **Task 2.3**: OAuth 콜백 핸들러
-  - Slack 메시지로 인증 코드 수신
-  - 또는 별도 경량 웹서버 (선택)
+- [ ] **Task 2.4**: FastAPI OAuth 콜백 서버
+  - File: `src/adapters/oauth/server.py`
+  - 엔드포인트: `GET /oauth/callback`
+  - state에서 user_id 추출
+  - 토큰 교환 후 저장
+  - 성공/실패 HTML 페이지 응답
+  - Slack으로 연결 완료 메시지 전송
+
+- [ ] **Task 2.5**: main.py에서 FastAPI 서버 실행
+  - uvicorn 백그라운드 실행
+  - Slack Bot과 동시 실행
+
+- [ ] **Task 2.6**: Docker 포트 노출
+  - docker-compose.yml에 8080 포트 추가
 
 #### Quality Gate ✋
 - [ ] Mock OAuth로 테스트 통과
+- [ ] 실제 OAuth 콜백 테스트 (수동)
 - [ ] 린트/포매팅 통과
 
 ---
@@ -266,11 +305,11 @@ Total:                    ░░░░░░░░░░░░   0%
 | Phase | Estimated | Actual | Variance |
 |-------|-----------|--------|----------|
 | Phase 1 | 3시간 | - | - |
-| Phase 2 | 4시간 | - | - |
+| Phase 2 | 5시간 | - | - |
 | Phase 3 | 3시간 | - | - |
 | Phase 4 | 2시간 | - | - |
 | Phase 5 | 2시간 | - | - |
-| **Total** | 14시간 | - | - |
+| **Total** | 15시간 | - | - |
 
 ---
 
@@ -303,19 +342,28 @@ src/core/auth/
 ├── oauth_service.py       # OAuth 인증 서비스
 └── token_scheduler.py     # 토큰 갱신 스케줄러
 
+src/adapters/oauth/
+├── __init__.py
+└── server.py              # FastAPI OAuth 콜백 서버
+
 tests/unit/core/auth/
 ├── test_encryption.py
 ├── test_token_repository.py
 ├── test_oauth_service.py
 └── test_token_scheduler.py
+
+tests/unit/adapters/oauth/
+└── test_oauth_server.py   # OAuth 콜백 테스트
 ```
 
 ### 수정되는 파일
 ```
 src/adapters/slack/handler.py  # 슬래시 명령어 추가
-src/main.py                    # 스케줄러 초기화
-pyproject.toml                 # cryptography 추가
-.env.example                   # ENCRYPTION_KEY 추가
+src/main.py                    # FastAPI + Slack Bot 동시 실행
+pyproject.toml                 # cryptography, fastapi, uvicorn 추가
+docker-compose.yml             # 8080 포트 노출
+docker-compose.local.yml       # 8080 포트 노출
+.env.example                   # ENCRYPTION_KEY, OAUTH_REDIRECT_URI 추가
 ```
 
 ---
