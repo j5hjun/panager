@@ -1,8 +1,8 @@
 # Implementation Plan: 다중 사용자 시스템
 
-**Status**: ⏳ Planned
+**Status**: 🔄 In Progress
 **Plan ID**: P-014
-**Started**: -
+**Started**: 2026-01-05
 **Last Updated**: 2026-01-05
 **Estimated Completion**: 2026-01-08
 **Dependencies**: P-011 (메모리 시스템)
@@ -122,12 +122,13 @@ tests/integration/
 ### Phase 1: 토큰 저장소 (TokenRepository)
 **Goal**: 사용자별 OAuth 토큰 암호화 저장
 **Estimated Time**: 3시간
-**Status**: ⏳ Pending
+**Actual Time**: 0.5시간
+**Status**: ✅ Complete
 
 #### Tasks
 
 **🔴 RED: Write Failing Tests First**
-- [ ] **Test 1.1**: TokenRepository 테스트
+- [x] **Test 1.1**: TokenRepository 테스트
   - `test_save_token`: 토큰 저장
   - `test_get_token`: 토큰 조회
   - `test_delete_token`: 토큰 삭제
@@ -135,23 +136,23 @@ tests/integration/
   - `test_list_user_tokens`: 사용자별 토큰 목록
 
 **🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 1.2**: 암호화 유틸리티 구현
-  - File: `src/core/auth/encryption.py`
+- [x] **Task 1.2**: 암호화 유틸리티 구현
+  - File: `src/core/auth/token_repository.py` (내장)
   - Fernet 대칭키 암호화
-  - 환경변수에서 키 로드
+  - hashlib.sha256으로 키 생성
 
-- [ ] **Task 1.3**: TokenRepository 구현
+- [x] **Task 1.3**: TokenRepository 구현
   - File: `src/core/auth/token_repository.py`
   - 테이블: `oauth_tokens`
   - 컬럼: user_id, provider, access_token, refresh_token, expires_at, created_at
 
 **🔵 REFACTOR: Clean Up Code**
-- [ ] **Task 1.4**: 코드 정리 및 문서화
+- [x] **Task 1.4**: 코드 정리 및 문서화
 
 #### Quality Gate ✋
-- [ ] 모든 테스트 통과
-- [ ] 토큰 암호화 확인 (평문 저장 안 됨)
-- [ ] 린트/포매팅 통과
+- [x] 모든 테스트 통과 (8개)
+- [x] 토큰 암호화 확인 (평문 저장 안 됨)
+- [x] 린트/포매팅 통과
 
 ---
 
@@ -292,19 +293,19 @@ tests/integration/
 
 ### Completion Status
 ```
-Phase 1: 토큰 저장소      ░░░░░░░░░░░░   0%
+Phase 1: 토큰 저장소      ████████████ 100% ✅
 Phase 2: OAuth 서비스     ░░░░░░░░░░░░   0%
 Phase 3: Slack 명령어     ░░░░░░░░░░░░   0%
 Phase 4: 토큰 갱신        ░░░░░░░░░░░░   0%
 Phase 5: 통합 테스트      ░░░░░░░░░░░░   0%
 ─────────────────────────────────────────
-Total:                    ░░░░░░░░░░░░   0%
+Total:                    ██░░░░░░░░░░  20%
 ```
 
 ### Time Tracking
 | Phase | Estimated | Actual | Variance |
 |-------|-----------|--------|----------|
-| Phase 1 | 3시간 | - | - |
+| Phase 1 | 3시간 | 0.5시간 | -2.5시간 ✅ |
 | Phase 2 | 5시간 | - | - |
 | Phase 3 | 3시간 | - | - |
 | Phase 4 | 2시간 | - | - |
