@@ -2,11 +2,14 @@
 사용자 알림 설정
 
 사용자별 알림 설정을 관리합니다.
+P-011 Phase 6: SQLite 영속화 (UserProfileRepository 재사용)
 """
 
 import logging
 from dataclasses import dataclass
 from typing import Any
+
+from src.core.autonomous.memory.user_profile_repository import UserProfileRepository
 
 logger = logging.getLogger(__name__)
 
@@ -61,20 +64,29 @@ class UserSettingsManager:
     사용자 설정 관리자
 
     사용자별 알림 설정을 저장하고 조회합니다.
-    현재는 메모리에 저장하며, 추후 DB로 전환 가능합니다.
+    P-011: SQLite 기반 영속화 (UserProfileRepository preferences 활용)
     """
 
-    def __init__(self, default_city: str = "Seoul", default_channel: str = ""):
+    def __init__(
+        self,
+        default_city: str = "Seoul",
+        default_channel: str = "",
+        repository: UserProfileRepository | None = None,
+        db_path: str = "data/memory.db",
+    ):
         """
         UserSettingsManager 초기화
 
         Args:
             default_city: 기본 도시
             default_channel: 기본 채널 ID
+            repository: UserProfileRepository (DI용)
+            db_path: DB 경로 (repository가 없을 때 사용)
         """
-        self._settings: dict[str, UserAlertSettings] = {}
+        self._repository = repository or UserProfileRepository(db_path=db_path)
         self.default_city = default_city
         self.default_channel = default_channel
+        self._cache: dict[str, UserAlertSettings] = {}  # DB 조회 캐시
 
         logger.info(f"UserSettingsManager 초기화 (default_city={default_city})")
 
@@ -88,13 +100,39 @@ class UserSettingsManager:
         Returns:
             사용자 설정 (없으면 기본값으로 생성)
         """
-        if user_id not in self._settings:
-            self._settings[user_id] = UserAlertSettings(
+        # 캐시 확인
+        if user_id in self._cache:
+            return self._cache[user_id]
+
+        # DB에서 조회
+        profile = self._repository.get_or_create(user_id)
+        preferences = profile.get("preferences", {})
+
+        if preferences:
+            settings = UserAlertSettings.from_dict(
+                {
+                    "user_id": user_id,
+                    **preferences,
+                }
+            )
+        else:
+            # 기본 설정 생성
+            settings = UserAlertSettings(
                 user_id=user_id,
                 channel_id=self.default_channel,
                 city=self.default_city,
             )
-        return self._settings[user_id]
+            # DB에 저장
+            self._save_settings(settings)
+
+        self._cache[user_id] = settings
+        return settings
+
+    def _save_settings(self, settings: UserAlertSettings) -> None:
+        """설정을 DB에 저장"""
+        preferences = settings.to_dict()
+        preferences.pop("user_id", None)  # user_id는 별도 컬럼
+        self._repository.update_preferences(settings.user_id, preferences)
 
     def update_settings(self, user_id: str, **kwargs: Any) -> UserAlertSettings:
         """
@@ -112,6 +150,12 @@ class UserSettingsManager:
         for key, value in kwargs.items():
             if hasattr(settings, key):
                 setattr(settings, key, value)
+
+        # DB에 저장
+        self._save_settings(settings)
+
+        # 캐시 갱신
+        self._cache[user_id] = settings
 
         logger.info(f"설정 업데이트: {user_id} - {kwargs}")
         return settings
@@ -133,8 +177,22 @@ class UserSettingsManager:
 
     def get_all_users_with_morning_briefing(self) -> list[UserAlertSettings]:
         """아침 브리핑이 활성화된 모든 사용자 조회"""
-        return [s for s in self._settings.values() if s.morning_briefing_enabled]
+        all_profiles = self._repository.get_all()
+        result = []
+
+        for profile in all_profiles:
+            user_id = profile["user_id"]
+            settings = self.get_settings(user_id)
+            if settings.morning_briefing_enabled:
+                result.append(settings)
+
+        return result
 
     def list_all_settings(self) -> list[UserAlertSettings]:
         """모든 사용자 설정 조회"""
-        return list(self._settings.values())
+        all_profiles = self._repository.get_all()
+        return [self.get_settings(profile["user_id"]) for profile in all_profiles]
+
+    def close(self) -> None:
+        """리소스 정리"""
+        self._repository.close()

@@ -3,7 +3,7 @@ Act 노드
 
 판단 결과에 따라 행동을 실행합니다.
 - 알림 전송 (Slack)
-- 알림 이력 기록
+- 알림 이력 기록 (P-011: SQLite DB)
 """
 
 import logging
@@ -11,12 +11,27 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
+from src.core.autonomous.memory.notification_repository import NotificationRepository
 from src.core.autonomous.state import AgentState
 
 logger = logging.getLogger(__name__)
 
-# 알림 이력 저장소 (메모리 기반, TODO: P-011에서 DB로 전환)
-_notification_history: list[dict] = []
+# 알림 이력 저장소 (싱글톤)
+_notification_repository: NotificationRepository | None = None
+
+
+def _get_notification_repository() -> NotificationRepository:
+    """알림 이력 저장소 싱글톤 반환"""
+    global _notification_repository
+    if _notification_repository is None:
+        _notification_repository = NotificationRepository(db_path=":memory:")
+    return _notification_repository
+
+
+def set_notification_repository(repository: NotificationRepository) -> None:
+    """알림 이력 저장소 설정 (DI용)"""
+    global _notification_repository
+    _notification_repository = repository
 
 
 def act_node(state: AgentState) -> AgentState:
@@ -59,7 +74,7 @@ def act_node(state: AgentState) -> AgentState:
     }
 
     # 알림 이력 기록
-    _record_notification(action, result)
+    _record_notification(action, result, user_id="sync_user")
 
     return {
         **state,
@@ -139,7 +154,7 @@ async def act_node_async(
         result["error"] = str(e)
 
     # 알림 이력 기록
-    _record_notification(action, result)
+    _record_notification(action, result, user_id=user_id or "unknown")
 
     # 알림 카운트 증가
     notification_count = state.get("today_notification_count", 0)
@@ -168,39 +183,46 @@ async def _send_notification(
         await result
 
 
-def _record_notification(action: dict, result: dict) -> None:
-    """알림 이력 기록"""
-    record = {
-        "action_type": action.get("type", "unknown"),
-        "message": action.get("message", ""),
-        "success": result.get("success", False),
-        "timestamp": result.get("timestamp", datetime.now().isoformat()),
-        "error": result.get("error"),
-    }
-    _notification_history.append(record)
+def _record_notification(action: dict, result: dict, user_id: str = "unknown") -> None:
+    """알림 이력 기록 (Repository 사용)"""
+    repo = _get_notification_repository()
 
-    # 최대 100개 유지
-    if len(_notification_history) > 100:
-        _notification_history.pop(0)
+    notification_type = action.get("type", "unknown")
+    message = action.get("message", "")
 
-    logger.debug(f"[Act] 알림 기록: {record}")
+    repo.save(
+        user_id=user_id,
+        message=message,
+        notification_type=notification_type,
+    )
+
+    logger.debug(f"[Act] 알림 기록 (DB): {notification_type}")
 
 
 def get_notification_history() -> list[dict]:
     """알림 이력 조회"""
-    return _notification_history.copy()
+    repo = _get_notification_repository()
+    # 모든 알림 조회 (user_id별로 조회하기 어려우므로 직접 DB 쿼리)
+    cursor = repo._conn.execute("SELECT * FROM notification_history ORDER BY sent_at DESC")
+    return [repo._row_to_dict(row) for row in cursor.fetchall()]
 
 
 def get_today_notification_count() -> int:
     """오늘 알림 횟수 조회"""
-    today = datetime.now().date().isoformat()
-    count = 0
-    for record in _notification_history:
-        if record.get("timestamp", "").startswith(today) and record.get("success"):
-            count += 1
-    return count
+    repo = _get_notification_repository()
+    from datetime import datetime
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    cursor = repo._conn.execute(
+        "SELECT COUNT(*) FROM notification_history WHERE sent_at LIKE ?",
+        (f"{today}%",),
+    )
+    return cursor.fetchone()[0]
 
 
 def clear_notification_history() -> None:
     """알림 이력 초기화 (테스트용)"""
-    _notification_history.clear()
+    global _notification_repository
+    if _notification_repository:
+        _notification_repository.close()
+    _notification_repository = NotificationRepository(db_path=":memory:")

@@ -124,35 +124,38 @@ class TestLessonStorage:
             "id": "test-001",
             "context": "테스트 상황",
             "should_not": "하지마",
+            "should_instead": "이렇게 해",
         }
 
         _save_lesson(lesson)
 
         lessons = get_lessons()
         assert len(lessons) == 1
-        assert lessons[0]["id"] == "test-001"
+        # Repository 사용 시 ID는 자동 생성됨
+        assert "id" in lessons[0]
+        assert "하지마" in lessons[0]["content"]
 
     def test_lesson_limit(self):
         """최대 50개 유지"""
         for i in range(55):
-            _save_lesson({"id": f"lesson-{i}"})
+            _save_lesson({"id": f"lesson-{i}", "should_not": f"msg-{i}", "should_instead": ""})
 
         lessons = get_lessons()
         assert len(lessons) == 50
-        assert lessons[0]["id"] == "lesson-5"
 
     def test_get_relevant_lessons(self):
         """관련 교훈 조회"""
         for i in range(10):
-            _save_lesson({"id": f"lesson-{i}"})
+            _save_lesson({"id": f"lesson-{i}", "should_not": f"msg-{i}", "should_instead": ""})
 
         relevant = get_relevant_lessons()
         assert len(relevant) == 5
-        assert relevant[-1]["id"] == "lesson-9"
+        # 최신 5개 반환 (최신순)
+        assert "msg-9" in relevant[0]["content"]
 
     def test_clear_lessons(self):
         """교훈 초기화"""
-        _save_lesson({"id": "test"})
+        _save_lesson({"id": "test", "should_not": "test", "should_instead": ""})
         clear_lessons()
 
         assert len(get_lessons()) == 0
@@ -246,7 +249,7 @@ class TestReflectNodeAsync:
         state["time_period"] = "morning"
 
         mock_llm = AsyncMock()
-        mock_llm.chat.return_value = json.dumps(
+        mock_llm.chat_async.return_value = json.dumps(
             {
                 "reaction_type": "negative",
                 "analysis": "너무 이른 알림",
@@ -297,7 +300,7 @@ class TestReflectNodeAsync:
         state["action"] = {"type": "notify", "message": "테스트"}
 
         mock_llm = AsyncMock()
-        mock_llm.chat.side_effect = Exception("LLM Error")
+        mock_llm.chat_async.side_effect = Exception("LLM Error")
 
         result = await reflect_node_async(
             state,

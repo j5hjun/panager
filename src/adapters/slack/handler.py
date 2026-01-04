@@ -28,6 +28,7 @@ class SlackHandler:
         app_token: str,
         message_callback: Callable[[dict], str] | None = None,
         token_verification_enabled: bool = True,
+        memory_manager=None,
     ):
         """
         SlackHandler 초기화
@@ -37,10 +38,12 @@ class SlackHandler:
             app_token: Slack App-Level Token (xapp-...)
             message_callback: 메시지 처리 콜백 함수 (LLM 연동 시 사용)
             token_verification_enabled: 토큰 검증 활성화 여부 (테스트 시 False)
+            memory_manager: 메모리 관리자 (P-011, 사용자 활동 추적용)
         """
         self.bot_token = bot_token
         self.app_token = app_token
         self.message_callback = message_callback
+        self.memory_manager = memory_manager
 
         # 최근 대화한 사용자 ID (자율 판단 알림용)
         self._active_user_id: str | None = None
@@ -80,6 +83,13 @@ class SlackHandler:
         if user and user != "unknown":
             self._active_user_id = user
             logger.debug(f"활성 사용자 ID 업데이트: {user}")
+
+            # P-011: 메모리 시스템에 사용자 활동 기록
+            if self.memory_manager:
+                try:
+                    self.memory_manager.update_user_activity(user)
+                except Exception as e:
+                    logger.warning(f"사용자 활동 기록 실패: {e}")
 
         logger.info(f"DM from {user}: {text}")
 
