@@ -7,7 +7,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock
 
 import pytest
-
 from src.core.autonomous.nodes.think import (
     _apply_business_rules,
     _build_prompt,

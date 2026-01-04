@@ -6,13 +6,12 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from src.core.autonomous.nodes.observe import (
     _schedule_to_dict,
     observe_node,
     observe_node_async,
 )
-from src.core.autonomous.state import AgentState, create_initial_state
+from src.core.autonomous.state import create_initial_state
 
 
 class TestObserveNode:

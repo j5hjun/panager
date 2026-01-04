@@ -6,7 +6,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from src.core.autonomous.nodes.act import (
     _record_notification,
     act_node,
@@ -15,7 +14,7 @@ from src.core.autonomous.nodes.act import (
     get_notification_history,
     get_today_notification_count,
 )
-from src.core.autonomous.state import AgentState, create_initial_state
+from src.core.autonomous.state import create_initial_state
 
 
 class TestActNode:

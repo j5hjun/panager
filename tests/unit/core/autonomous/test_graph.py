@@ -2,11 +2,9 @@
 자율 판단 그래프 및 러너 테스트
 """
 
-import json
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from src.core.autonomous.graph import (
     AutonomousRunner,
     _route_decision,
