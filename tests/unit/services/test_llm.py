@@ -81,18 +81,27 @@ class TestLLMClient:
 class TestConversationManager:
     """대화 관리자 테스트"""
 
+    @pytest.fixture
+    def manager(self):
+        """테스트용 인메모리 ConversationManager"""
+        from src.core.autonomous.memory.conversation_repository import (
+            ConversationRepository,
+        )
+        from src.core.logic.conversation import ConversationManager
+
+        repo = ConversationRepository(db_path=":memory:")
+        mgr = ConversationManager(repository=repo)
+        yield mgr
+        repo.close()
+
     def test_conversation_manager_can_be_imported(self):
         """ConversationManager 클래스를 import할 수 있어야 함"""
         from src.core.logic.conversation import ConversationManager
 
         assert ConversationManager is not None
 
-    def test_conversation_manager_add_message(self):
+    def test_conversation_manager_add_message(self, manager):
         """대화에 메시지를 추가할 수 있어야 함"""
-        from src.core.logic.conversation import ConversationManager
-
-        manager = ConversationManager()
-
         manager.add_message("user123", "user", "안녕하세요")
         manager.add_message("user123", "assistant", "안녕하세요! 반갑습니다.")
 
@@ -101,12 +110,8 @@ class TestConversationManager:
         assert history[0]["role"] == "user"
         assert history[0]["content"] == "안녕하세요"
 
-    def test_conversation_manager_separate_users(self):
+    def test_conversation_manager_separate_users(self, manager):
         """사용자별로 대화가 분리되어야 함"""
-        from src.core.logic.conversation import ConversationManager
-
-        manager = ConversationManager()
-
         manager.add_message("user1", "user", "안녕")
         manager.add_message("user2", "user", "반가워")
 
@@ -115,25 +120,26 @@ class TestConversationManager:
         assert manager.get_history("user1")[0]["content"] == "안녕"
         assert manager.get_history("user2")[0]["content"] == "반가워"
 
-    def test_conversation_manager_max_history(self):
+    def test_conversation_manager_max_history(self, manager):
         """대화 기록이 최대 길이를 초과하면 오래된 것부터 삭제"""
+        from src.core.autonomous.memory.conversation_repository import (
+            ConversationRepository,
+        )
         from src.core.logic.conversation import ConversationManager
 
-        manager = ConversationManager(max_history=4)
+        repo = ConversationRepository(db_path=":memory:", max_history=4)
+        mgr = ConversationManager(max_history=4, repository=repo)
 
         for i in range(10):
-            manager.add_message("user1", "user", f"메시지 {i}")
+            mgr.add_message("user1", "user", f"메시지 {i}")
 
-        history = manager.get_history("user1")
+        history = mgr.get_history("user1")
         assert len(history) == 4
         assert history[0]["content"] == "메시지 6"  # 가장 오래된 것은 삭제됨
+        repo.close()
 
-    def test_conversation_manager_clear_history(self):
+    def test_conversation_manager_clear_history(self, manager):
         """대화 기록을 초기화할 수 있어야 함"""
-        from src.core.logic.conversation import ConversationManager
-
-        manager = ConversationManager()
-
         manager.add_message("user1", "user", "안녕")
         manager.clear_history("user1")
 
