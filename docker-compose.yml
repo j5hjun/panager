@@ -10,7 +10,7 @@ services:
 
     # Volumes for data persistence
     volumes:
-      - ./data:/app/data
+      - panager_data:/app/data
 
     # Logging configuration
     logging:
@@ -28,3 +28,8 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
+
+volumes:
+  panager_data:
+
+
