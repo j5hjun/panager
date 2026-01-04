@@ -190,12 +190,12 @@ tests/integration/
   - 토큰 교환 후 저장
   - 성공/실패 HTML 페이지 응답
 
-- [ ] **Task 2.5**: main.py에서 FastAPI 서버 실행 (Phase 5에서)
-- [ ] **Task 2.6**: Docker 포트 노출 (Phase 5에서)
+- [x] **Task 2.5**: main.py에서 FastAPI 서버 실행
+- [x] **Task 2.6**: Docker 포트 노출 (8080)
 
 #### Quality Gate ✋
 - [x] Mock OAuth로 테스트 통과 (10개)
-- [ ] 실제 OAuth 콜백 테스트 (수동) - Phase 5에서
+- [x] 실제 OAuth 콜백 테스트 ✅
 - [x] 린트/포매팅 통과
 
 ---
@@ -227,7 +227,7 @@ tests/integration/
 
 #### Quality Gate ✋
 - [x] 모든 테스트 통과 (6개)
-- [ ] 실제 Slack 테스트 (수동) - Phase 5에서
+- [x] 실제 Slack 테스트 ✅
 
 ---
 
@@ -251,11 +251,11 @@ tests/integration/
   - APScheduler 활용
   - 만료 10분 전 갱신
 
-- [ ] **Task 4.3**: main.py 통합 (Phase 5에서)
+- [x] **Task 4.3**: main.py 통합
 
 #### Quality Gate ✋
 - [x] 모든 테스트 통과 (8개)
-- [ ] Docker 테스트 통과 - Phase 5에서
+- [x] Docker 테스트 통과 ✅
 
 ---
 
@@ -280,7 +280,7 @@ tests/integration/
 
 #### Quality Gate ✋
 - [x] 전체 테스트 통과 (317개)
-- [ ] Docker 테스트 통과 - 배포 시
+- [x] Docker 테스트 통과 ✅
 - [x] 문서 완료
 
 ---
@@ -381,8 +381,8 @@ docker-compose.local.yml       # 8080 포트 노출
 - [x] Slack 명령어 테스트 (단위 테스트)
 - [x] 토큰 갱신 테스트 (단위 테스트)
 - [x] 문서 업데이트 (.env.example)
-- [ ] PLAN_master.md 업데이트
-- [ ] P-013 Blocked 해제
+- [x] PLAN_master.md 업데이트
+- [x] P-013 Blocked 해제 (PLAN_master.md에 등록됨)
 
 ---
 

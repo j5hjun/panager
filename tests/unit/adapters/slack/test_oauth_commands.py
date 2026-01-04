@@ -5,7 +5,7 @@ TDD RED Phase: Slack 슬래시 명령어 테스트
 """
 
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock
 
 
 class TestSlackOAuthCommands:
@@ -46,18 +46,17 @@ class TestSlackOAuthCommands:
             token_repository=mock_token_repository,
         )
 
-    @pytest.mark.asyncio
-    async def test_connect_google_command(self, commands, mock_oauth_service):
+    def test_connect_google_command(self, commands, mock_oauth_service):
         """'/connect google' 명령어 처리"""
         # Mock Slack context
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {
             "user_id": "U123",
             "text": "google",
         }
 
-        await commands.handle_connect(ack, command, respond)
+        commands.handle_connect(ack, command, respond)
 
         # ack 호출 확인
         ack.assert_called_once()
@@ -70,65 +69,61 @@ class TestSlackOAuthCommands:
         response_text = respond.call_args[1].get("text", "") or respond.call_args[0][0]
         assert "https://accounts.google.com" in response_text or "연결" in response_text
 
-    @pytest.mark.asyncio
-    async def test_connect_invalid_provider(self, commands):
+    def test_connect_invalid_provider(self, commands):
         """지원하지 않는 제공자"""
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {
             "user_id": "U123",
             "text": "invalid_provider",
         }
 
-        await commands.handle_connect(ack, command, respond)
+        commands.handle_connect(ack, command, respond)
 
         ack.assert_called_once()
         respond.assert_called_once()
         response_text = str(respond.call_args)
         assert "지원" in response_text or "google" in response_text.lower()
 
-    @pytest.mark.asyncio
-    async def test_connect_no_provider(self, commands):
+    def test_connect_no_provider(self, commands):
         """제공자 미입력"""
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {
             "user_id": "U123",
             "text": "",
         }
 
-        await commands.handle_connect(ack, command, respond)
+        commands.handle_connect(ack, command, respond)
 
         ack.assert_called_once()
         respond.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_disconnect_command(self, commands, mock_oauth_service):
+    def test_disconnect_command(self, commands, mock_oauth_service):
         """'/disconnect google' 명령어 처리"""
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {
             "user_id": "U123",
             "text": "google",
         }
 
-        await commands.handle_disconnect(ack, command, respond)
+        commands.handle_disconnect(ack, command, respond)
 
         ack.assert_called_once()
         mock_oauth_service.revoke_token.assert_called_once_with("U123", "google")
         respond.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_accounts_command(self, commands, mock_token_repository):
+    def test_accounts_command(self, commands, mock_token_repository):
         """'/accounts' 명령어 - 연결된 계정 목록"""
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {
             "user_id": "U123",
             "text": "",
         }
 
-        await commands.handle_accounts(ack, command, respond)
+        commands.handle_accounts(ack, command, respond)
 
         ack.assert_called_once()
         mock_token_repository.list_user_tokens.assert_called_once_with("U123")
@@ -138,19 +133,18 @@ class TestSlackOAuthCommands:
         response_text = str(respond.call_args)
         assert "google" in response_text.lower() or "연결" in response_text
 
-    @pytest.mark.asyncio
-    async def test_accounts_no_connections(self, commands, mock_token_repository):
+    def test_accounts_no_connections(self, commands, mock_token_repository):
         """연결된 계정 없음"""
         mock_token_repository.list_user_tokens.return_value = []
 
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {
             "user_id": "U123",
             "text": "",
         }
 
-        await commands.handle_accounts(ack, command, respond)
+        commands.handle_accounts(ack, command, respond)
 
         ack.assert_called_once()
         respond.assert_called_once()

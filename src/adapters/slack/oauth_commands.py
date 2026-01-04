@@ -31,20 +31,20 @@ class SlackOAuthCommands:
         self.oauth_service = oauth_service
         self.token_repository = token_repository
 
-    async def handle_connect(self, ack: Any, command: dict, respond: Any) -> None:
+    def handle_connect(self, ack: Any, command: dict, respond: Any) -> None:
         """
         /connect 명령어 처리
 
         사용법: /connect google
         """
-        await ack()
+        ack()
 
         user_id = command["user_id"]
         provider = command.get("text", "").strip().lower()
 
         # 제공자 미입력
         if not provider:
-            await respond(
+            respond(
                 text="📎 사용법: `/connect [google|icloud]`\n\n"
                 "예시:\n"
                 "• `/connect google` - Google 계정 연결\n"
@@ -54,7 +54,7 @@ class SlackOAuthCommands:
 
         # 지원하지 않는 제공자
         if provider not in SUPPORTED_PROVIDERS:
-            await respond(
+            respond(
                 text=f"❌ 지원하지 않는 서비스입니다: `{provider}`\n\n"
                 f"지원 서비스: {', '.join(SUPPORTED_PROVIDERS)}"
             )
@@ -65,7 +65,7 @@ class SlackOAuthCommands:
             auth_url, state = self.oauth_service.generate_auth_url(provider, user_id, None)
 
             # 사용자에게 URL 전송
-            await respond(
+            respond(
                 text=f"🔗 *{provider.title()} 계정 연결*\n\n"
                 f"아래 링크를 클릭하여 인증을 완료하세요:\n"
                 f"<{auth_url}|{provider.title()} 연결하기>\n\n"
@@ -76,22 +76,22 @@ class SlackOAuthCommands:
 
         except Exception as e:
             logger.error(f"OAuth URL 생성 실패: {e}")
-            await respond(text=f"❌ 연결 URL 생성 실패: {str(e)}")
+            respond(text=f"❌ 연결 URL 생성 실패: {str(e)}")
 
-    async def handle_disconnect(self, ack: Any, command: dict, respond: Any) -> None:
+    def handle_disconnect(self, ack: Any, command: dict, respond: Any) -> None:
         """
         /disconnect 명령어 처리
 
         사용법: /disconnect google
         """
-        await ack()
+        ack()
 
         user_id = command["user_id"]
         provider = command.get("text", "").strip().lower()
 
         # 제공자 미입력
         if not provider:
-            await respond(
+            respond(
                 text="📎 사용법: `/disconnect [google|icloud]`\n\n" "예시: `/disconnect google`"
             )
             return
@@ -101,24 +101,24 @@ class SlackOAuthCommands:
             result = self.oauth_service.revoke_token(user_id, provider)
 
             if result:
-                await respond(
+                respond(
                     text=f"✅ *{provider.title()} 계정 연결 해제 완료*\n\n"
                     f"다시 연결하려면 `/connect {provider}`를 사용하세요."
                 )
             else:
-                await respond(text=f"❌ 연결된 {provider.title()} 계정이 없습니다.")
+                respond(text=f"❌ 연결된 {provider.title()} 계정이 없습니다.")
 
         except Exception as e:
             logger.error(f"연결 해제 실패: {e}")
-            await respond(text=f"❌ 연결 해제 실패: {str(e)}")
+            respond(text=f"❌ 연결 해제 실패: {str(e)}")
 
-    async def handle_accounts(self, ack: Any, command: dict, respond: Any) -> None:
+    def handle_accounts(self, ack: Any, command: dict, respond: Any) -> None:
         """
         /accounts 명령어 처리
 
         연결된 계정 목록을 표시합니다.
         """
-        await ack()
+        ack()
 
         user_id = command["user_id"]
 
@@ -127,7 +127,7 @@ class SlackOAuthCommands:
             tokens = self.token_repository.list_user_tokens(user_id)
 
             if not tokens:
-                await respond(
+                respond(
                     text="📭 연결된 계정이 없습니다.\n\n"
                     "`/connect google` 또는 `/connect icloud`로 계정을 연결하세요."
                 )
@@ -143,11 +143,11 @@ class SlackOAuthCommands:
             lines.append(f"\n_총 {len(tokens)}개 계정 연결됨_")
             lines.append("\n연결 해제: `/disconnect [provider]`")
 
-            await respond(text="\n".join(lines))
+            respond(text="\n".join(lines))
 
         except Exception as e:
             logger.error(f"계정 목록 조회 실패: {e}")
-            await respond(text=f"❌ 계정 목록 조회 실패: {str(e)}")
+            respond(text=f"❌ 계정 목록 조회 실패: {str(e)}")
 
     def register_commands(self, app: Any) -> None:
         """
@@ -161,3 +161,4 @@ class SlackOAuthCommands:
         app.command("/accounts")(self.handle_accounts)
 
         logger.info("OAuth 명령어 등록 완료")
+
