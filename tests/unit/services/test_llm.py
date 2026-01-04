@@ -149,7 +149,6 @@ class TestConversationManager:
 class TestPanizerPersona:
     """패니저 페르소나 테스트"""
 
-
     def test_persona_prompt_can_be_imported(self):
         """패니저 시스템 프롬프트를 import할 수 있어야 함"""
         from src.core.prompts.panager_persona import get_system_prompt
