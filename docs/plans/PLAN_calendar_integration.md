@@ -1,11 +1,18 @@
 # Implementation Plan: 외부 캘린더 연동 및 스마트 일정 어시스턴트
 
-**Status**: ⏳ Planned
+**Status**: 🔒 Blocked (P-014 대기)
 **Plan ID**: P-013
 **Started**: -
-**Last Updated**: 2026-01-04
-**Estimated Completion**: 2026-01-11
-**Dependencies**: P-010, P-011
+**Last Updated**: 2026-01-05
+**Estimated Completion**: -
+**Dependencies**: P-010, P-011, **P-014** (다중 사용자 시스템)
+
+---
+
+**⚠️ 주의**: 이 계획은 P-014 (다중 사용자 시스템)가 완료된 후 진행합니다.
+
+다중 사용자 환경에서 각 사용자별 OAuth 토큰 관리가 필요하므로,
+P-014에서 토큰 저장소와 인증 흐름을 먼저 구현해야 합니다.
 
 ---
 
@@ -32,10 +39,12 @@
 현재 시스템은 로컬 SQLite DB만 사용합니다. 이를 외부 캘린더와 양방향 동기화하고,
 일정 기반 **스마트 어시스턴트** 기능을 추가합니다.
 
+**⚠️ 다중 사용자 지원**: 각 사용자별 Google/iCloud 계정 연동 (P-014 필요)
+
 ### Success Criteria
 
-- [ ] Google Calendar API 연동
-- [ ] iCloud Calendar 연동 (CalDAV)
+- [ ] Google Calendar API 연동 (사용자별)
+- [ ] iCloud Calendar 연동 (사용자별)
 - [ ] 일정 등록 시 자동 트리거 → 사용자에게 정보 제공
 - [ ] 슬랙에서 자연어로 일정 등록 → 캘린더 반영
 - [ ] 교통 정보, 출발 시간, 준비물 등 스마트 정보 제공
@@ -58,6 +67,7 @@
 | CalDAV for iCloud | 표준 프로토콜, 범용성 | Apple 특유의 제약 |
 | Polling 방식 | 단순, WebHook 설정 불필요 | 지연 있음 (5분 주기) |
 | 기존 CalendarService 확장 | 코드 재사용, 호환성 유지 | 인터페이스 변경 최소화 |
+| **P-014 토큰 저장소 활용** | 다중 사용자, 보안 | P-014 의존성 |
 
 ---
 
@@ -66,6 +76,7 @@
 ### Required Before Starting
 - [x] P-010 자율 판단 코어 완료
 - [x] P-011 메모리 시스템 완료
+- [ ] **P-014 다중 사용자 시스템 완료** ← 먼저 진행 필요
 - [ ] Google Cloud 프로젝트 설정 (API 키)
 - [ ] iCloud 앱 비밀번호 생성
 
