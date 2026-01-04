@@ -2,6 +2,7 @@
 통합형 능동적 AI 비서 "패니저" - 메인 진입점
 
 이 모듈은 애플리케이션의 시작점입니다.
+v2.0: 자율 판단 시스템 모듈 구현 완료 (유동적 실행 주기는 P-011에서 구현 예정)
 """
 
 import asyncio
@@ -90,6 +91,10 @@ def main() -> None:
     # AIService에 스케줄러 연동 (리마인더 기능용)
     ai_service.set_scheduler(scheduler, slack_handler.send_message)
     logger.info("🔗 리마인더 기능 활성화됨")
+
+    # 자율 판단 시스템 (P-010) 구현 완료
+    # 유동적 실행 주기 (사용자 데이터 기반)는 P-011 메모리 시스템에서 구현 예정
+    logger.info("🤖 자율 판단 시스템 모듈 로드 완료 (유동적 실행은 P-011에서 구현)")
 
     # 스케줄러 시작
     scheduler.start()

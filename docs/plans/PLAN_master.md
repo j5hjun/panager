@@ -232,7 +232,7 @@
 | ID | 계획서 | 상태 | 진행률 | 설명 | 의존성 |
 |----|--------|------|--------|------|--------|
 | P-009 | [PLAN_legacy_cleanup](./PLAN_legacy_cleanup.md) | ✅ Complete | 100% | v1.0 레거시 기능 삭제 (채널, 멘션, 아침브리핑) | P-001 |
-| P-010 | PLAN_autonomous_core | ⏳ Planned | 0% | 자율 판단 코어 (Observe-Think-Act-Reflect 루프) | P-009 |
+| P-010 | [PLAN_autonomous_core](./PLAN_autonomous_core.md) | ⏳ Planned | 0% | 자율 판단 코어 (Observe-Think-Act-Reflect 루프) | P-009 |
 | P-011 | PLAN_memory_system | ⏳ Planned | 0% | 학습 메모리 시스템 (교훈 저장/조회) | P-010 |
 | P-012 | PLAN_prompt_engineering | ⏳ Planned | 0% | 프롬프트 템플릿 설계 및 최적화 | P-010 |
 

@@ -42,6 +42,9 @@ class SlackHandler:
         self.app_token = app_token
         self.message_callback = message_callback
 
+        # 최근 대화한 사용자 ID (자율 판단 알림용)
+        self._active_user_id: str | None = None
+
         # Slack App 초기화
         self.app = App(
             token=bot_token,
@@ -72,6 +75,11 @@ class SlackHandler:
         """DM 메시지 처리"""
         text = self.extract_text(event)
         user = event.get("user", "unknown")
+
+        # 최근 대화한 사용자 ID 저장 (자율 판단 알림용)
+        if user and user != "unknown":
+            self._active_user_id = user
+            logger.debug(f"활성 사용자 ID 업데이트: {user}")
 
         logger.info(f"DM from {user}: {text}")
 
@@ -118,6 +126,15 @@ class SlackHandler:
             return True
 
         return False
+
+    def get_active_user_id(self) -> str | None:
+        """최근 대화한 사용자 ID 반환 (자율 판단 알림용)"""
+        return self._active_user_id
+
+    def set_active_user_id(self, user_id: str) -> None:
+        """활성 사용자 ID 수동 설정"""
+        self._active_user_id = user_id
+        logger.info(f"활성 사용자 ID 설정: {user_id}")
 
     def get_socket_mode_handler(self) -> SocketModeHandler:
         """Socket Mode Handler 반환"""
