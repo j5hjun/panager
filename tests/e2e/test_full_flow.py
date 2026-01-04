@@ -57,10 +57,14 @@ class TestFullConversationFlow:
 
     def test_conversation_history_persistence(self):
         """대화 기록 유지 테스트"""
+        from src.core.autonomous.memory.conversation_repository import (
+            ConversationRepository,
+        )
         from src.core.logic.conversation import ConversationManager
 
-        # Given: 대화 관리자
-        manager = ConversationManager()
+        # Given: 대화 관리자 (인메모리 DB)
+        repo = ConversationRepository(db_path=":memory:")
+        manager = ConversationManager(repository=repo)
 
         # When: 여러 메시지 추가
         manager.add_message("user1", "user", "안녕")
@@ -71,6 +75,8 @@ class TestFullConversationFlow:
         history = manager.get_history("user1")
         assert len(history) == 3
         assert history[0]["content"] == "안녕"
+
+        repo.close()
 
 
 class TestErrorHandling:
