@@ -4,9 +4,10 @@ OAuth 시스템 통합 테스트
 전체 OAuth 흐름을 테스트합니다.
 """
 
-import pytest
-from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
+
+import pytest
 
 
 class TestOAuthIntegration:

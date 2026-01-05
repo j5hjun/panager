@@ -4,9 +4,10 @@ OAuthService 테스트
 TDD RED Phase: OAuth 서비스 테스트
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
+
+import pytest
 
 
 class TestOAuthService:
@@ -156,8 +157,8 @@ class TestOAuthCallback:
         """FastAPI 테스트 클라이언트"""
         from fastapi.testclient import TestClient
         from src.adapters.oauth.server import create_oauth_app
-        from src.core.auth.token_repository import TokenRepository
         from src.core.auth.oauth_service import OAuthService
+        from src.core.auth.token_repository import TokenRepository
 
         # 테스트용 설정
         token_repo = TokenRepository(db_path=":memory:", encryption_key="test-key!")

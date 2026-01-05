@@ -4,9 +4,10 @@ TokenRefreshScheduler 테스트
 TDD RED Phase: 토큰 갱신 스케줄러 테스트
 """
 
-import pytest
-from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
+
+import pytest
 
 
 class TestTokenRefreshScheduler:

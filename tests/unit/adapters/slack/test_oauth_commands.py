@@ -4,8 +4,9 @@ Slack OAuth 명령어 테스트
 TDD RED Phase: Slack 슬래시 명령어 테스트
 """
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 
 class TestSlackOAuthCommands:

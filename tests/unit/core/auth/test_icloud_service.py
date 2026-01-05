@@ -4,8 +4,9 @@ iCloudService 테스트
 TDD RED Phase: iCloud CalDAV 연동 테스트
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 
 class TestICloudService:
