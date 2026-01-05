@@ -51,9 +51,7 @@ class TestOAuthService:
     def test_generate_auth_url_with_scopes(self, oauth_service):
         """스코프가 포함된 인증 URL"""
         url, state = oauth_service.generate_auth_url(
-            "google",
-            "U123",
-            scopes=["https://www.googleapis.com/auth/calendar.readonly"]
+            "google", "U123", scopes=["https://www.googleapis.com/auth/calendar.readonly"]
         )
 
         assert "scope=" in url

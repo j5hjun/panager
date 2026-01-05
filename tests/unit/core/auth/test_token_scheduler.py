@@ -65,7 +65,9 @@ class TestTokenRefreshScheduler:
         # 토큰 갱신 확인
         mock_oauth_service.refresh_token.assert_called_once_with("U123", "google")
 
-    def test_check_and_refresh_no_expiring_tokens(self, scheduler, mock_token_repository, mock_oauth_service):
+    def test_check_and_refresh_no_expiring_tokens(
+        self, scheduler, mock_token_repository, mock_oauth_service
+    ):
         """만료 임박 토큰 없음"""
         mock_token_repository.get_expiring_tokens.return_value = []
 
