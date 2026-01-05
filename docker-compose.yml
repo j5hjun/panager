@@ -8,6 +8,10 @@ services:
     env_file:
       - .env
 
+    # P-014: OAuth callback server port
+    ports:
+      - "8080:8080"
+
     # Volumes for data persistence
     volumes:
       - panager_data:/app/data
