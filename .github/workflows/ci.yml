@@ -24,6 +24,8 @@ jobs:
               - '**'
               - '!**.md'
               - '!docs/**'
+              - '!.agent/**'
+              - '!.github/**'
               - '!.gitignore'
               - '!LICENSE'
       

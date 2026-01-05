@@ -24,9 +24,9 @@ jobs:
     - name: Pull latest image
       run: docker compose pull
     
-    # 빠르게 컨테이너 교체
+    # 빠르게 컨테이너 교체 (env 변경 시에도 반영)
     - name: Deploy with minimal downtime
-      run: docker compose up -d --wait
+      run: docker compose up -d --force-recreate --wait
     
     - name: Check deployment status
       run: |
