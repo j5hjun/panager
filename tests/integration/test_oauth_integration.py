@@ -5,7 +5,7 @@ OAuth 시스템 통합 테스트
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
 
@@ -117,14 +117,13 @@ class TestOAuthIntegration:
         token = token_repository.get_token(user_id, "google")
         assert token["access_token"] == "refreshed_access"
 
-    @pytest.mark.asyncio
-    async def test_slack_connect_flow(self, slack_commands, oauth_service):
+    def test_slack_connect_flow(self, slack_commands, oauth_service):
         """Slack 명령어 흐름: /connect → URL 응답"""
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {"user_id": "U_SLACK_TEST", "text": "google"}
 
-        await slack_commands.handle_connect(ack, command, respond)
+        slack_commands.handle_connect(ack, command, respond)
 
         # ack 호출
         ack.assert_called_once()
@@ -134,8 +133,7 @@ class TestOAuthIntegration:
         response_text = str(respond.call_args)
         assert "accounts.google.com" in response_text or "연결" in response_text
 
-    @pytest.mark.asyncio
-    async def test_slack_disconnect_flow(self, slack_commands, token_repository, oauth_service):
+    def test_slack_disconnect_flow(self, slack_commands, token_repository, oauth_service):
         """Slack 명령어 흐름: 연결 → /disconnect → 삭제"""
         user_id = "U_DISCONNECT_TEST"
 
@@ -150,18 +148,17 @@ class TestOAuthIntegration:
 
         # 2. disconnect 실행
         with patch("src.core.auth.oauth_service.requests.post"):  # revoke mock
-            ack = AsyncMock()
-            respond = AsyncMock()
+            ack = Mock()
+            respond = Mock()
             command = {"user_id": user_id, "text": "google"}
 
-            await slack_commands.handle_disconnect(ack, command, respond)
+            slack_commands.handle_disconnect(ack, command, respond)
 
         # 3. 토큰 삭제 확인
         token = token_repository.get_token(user_id, "google")
         assert token is None
 
-    @pytest.mark.asyncio
-    async def test_slack_accounts_flow(self, slack_commands, token_repository):
+    def test_slack_accounts_flow(self, slack_commands, token_repository):
         """Slack 명령어 흐름: /accounts → 목록 표시"""
         user_id = "U_ACCOUNTS_TEST"
 
@@ -175,11 +172,11 @@ class TestOAuthIntegration:
         )
 
         # 2. accounts 실행
-        ack = AsyncMock()
-        respond = AsyncMock()
+        ack = Mock()
+        respond = Mock()
         command = {"user_id": user_id, "text": ""}
 
-        await slack_commands.handle_accounts(ack, command, respond)
+        slack_commands.handle_accounts(ack, command, respond)
 
         # 3. 응답 확인
         respond.assert_called_once()
