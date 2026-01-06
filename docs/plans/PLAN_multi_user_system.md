@@ -1,7 +1,7 @@
 # Implementation Plan: 다중 사용자 시스템
 
 **Status**: ✅ Complete
-**Plan ID**: P-014
+**Plan ID**: P-012
 **Started**: 2026-01-05
 **Last Updated**: 2026-01-05
 **Completed**: 2026-01-05
