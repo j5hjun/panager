@@ -236,9 +236,8 @@
 | P-009 | [PLAN_legacy_cleanup](./PLAN_legacy_cleanup.md) | ✅ Complete | 100% | v1.0 레거시 기능 삭제 (채널, 멘션, 아침브리핑) | P-001 |
 | P-010 | [PLAN_autonomous_core](./PLAN_autonomous_core.md) | ✅ Complete | 100% | 자율 판단 코어 (Observe-Think-Act-Reflect 루프) | P-009 |
 | P-011 | [PLAN_memory_system](./PLAN_memory_system.md) | ✅ Complete | 100% | 학습 메모리 시스템 (교훈 저장, 유동적 실행 주기) | P-010 |
-| P-012 | PLAN_prompt_engineering | ⏳ Planned | 0% | 프롬프트 템플릿 설계 및 최적화 | P-010 |
-| P-013 | [PLAN_calendar_integration](./PLAN_calendar_integration.md) | ⏳ Planned | 0% | 외부 캘린더 연동 (Google, iCloud) | P-014 |
-| P-014 | [PLAN_multi_user_system](./PLAN_multi_user_system.md) | ✅ Complete | 100% | 다중 사용자 OAuth 토큰 관리 | P-011 |
+| P-012 | [PLAN_multi_user_system](./PLAN_multi_user_system.md) | ✅ Complete | 100% | 다중 사용자 OAuth 토큰 관리 | P-011 |
+| P-013 | PLAN_calendar_integration | ⏳ Planned | 0% | 외부 캘린더 연동 (Google, iCloud) | P-012 |
 
 ---
 
@@ -267,13 +266,16 @@
 │   [v2.0 Autonomous]                                                         │
 │                                                                             │
 │   P-001 ────▶ P-009 Legacy Cleanup ────▶ P-010 Autonomous Core              │
-│                       ⏳                           ⏳                        │
+│                       ✅                           ✅                        │
 │                                                     │                       │
-│                                                     ├───▶ P-011 Memory      │
-│                                                     │            ⏳         │
+│                                                     ▼                       │
+│                                              P-011 Memory ✅                │
 │                                                     │                       │
-│                                                     └───▶ P-012 Prompts     │
-│                                                                  ⏳         │
+│                                                     ▼                       │
+│                                              P-012 Multi-user ✅            │
+│                                                     │                       │
+│                                                     ▼                       │
+│                                              P-013 Calendar ⏳              │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -509,7 +511,7 @@
 
 | 날짜 | 버전 | 변경 내용 |
 |------|------|----------|
-| 2026-01-05 | 1.1 | P-014 다중 사용자 시스템 완료, P-011 상태 업데이트 |
+| 2026-01-05 | 1.1 | P-012 다중 사용자 시스템 완료, P-011 상태 업데이트 |
 | 2026-01-03 | 1.0 | 최초 작성 |
 
 ---
