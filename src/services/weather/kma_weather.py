@@ -136,19 +136,17 @@ class KMAWeatherService:
         base_date, base_time = self._get_base_datetime()
         nx, ny = self._get_coordinates(city)
 
-        params = {
-            "serviceKey": self.api_key,
-            "numOfRows": "60",
-            "pageNo": "1",
-            "dataType": "JSON",
-            "base_date": base_date,
-            "base_time": base_time,
-            "nx": str(nx),
-            "ny": str(ny),
-        }
+        # 공공데이터포털 API는 서비스키를 Decoding 상태로 전달해야 함
+        # httpx params는 자동으로 URL 인코딩하므로, 직접 URL 구성
+        url = (
+            f"{KMA_API_URL}?serviceKey={self.api_key}"
+            f"&numOfRows=60&pageNo=1&dataType=JSON"
+            f"&base_date={base_date}&base_time={base_time}"
+            f"&nx={nx}&ny={ny}"
+        )
 
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(KMA_API_URL, params=params)
+            response = await client.get(url)
             response.raise_for_status()
             return response.json()
 
