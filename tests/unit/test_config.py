@@ -21,7 +21,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
@@ -55,7 +55,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
@@ -77,7 +77,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
             "LLM_MODEL": "gpt-4",
             "LLM_PROVIDER": "openai",
             "DEFAULT_CITY": "Busan",
@@ -102,7 +102,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
@@ -118,7 +118,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
             "LLM_PROVIDER": "groq",
         }
 
@@ -135,7 +135,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
             "LLM_PROVIDER": "openai",
         }
 
