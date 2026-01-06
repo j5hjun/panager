@@ -22,12 +22,11 @@ jobs:
           filters: |
             code:
               - '**'
-              - '!**.md'
+              - '!**/*.md'
               - '!docs/**'
               - '!.agent/**'
               - '!.github/**'
               - '!.gitignore'
-              - '!LICENSE'
       
       - name: Report
         run: |
