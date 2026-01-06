@@ -1,5 +1,5 @@
 ---
-description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구사항 → 계획 → 구현 → PR)
+description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구사항 → 디자인 → 계획 → 구현 → PR)
 ---
 
 # 기능 개발 워크플로우
@@ -25,7 +25,24 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 - **신규 작성 필요 시**: IEEE 830 표준 기반으로 SRS 작성
 - **요구사항 ID 확인**: 구현할 기능의 FR-XXX 또는 NFR-XXX ID 파악
 
-## 3. 통합 계획서 확인
+## 3. 디자인 문서 작성 (Design Options)
+
+구현 방법을 결정하기 위해 AI가 여러 대안을 분석합니다.
+
+**참조 템플릿**: `docs/templates/TEMPLATE_design_options.md`
+**작성 위치**: `docs/designs/DO_[기능명].md`
+
+**프로세스**:
+1. 사용자가 기능 목표 설명
+2. **AI가 최소 3가지 구현 방안 조사 및 비교**
+3. 각 방안의 장단점, 구현 난이도, 예상 시간 분석
+4. AI 추천 및 이유 제시
+5. **사용자가 방안 선택**
+6. 선택한 방안을 문서 하단 "결정" 섹션에 기록
+
+**중요**: 이 단계를 건너뛰면 구현 후 "다른 방법이 더 좋았을 텐데"라는 후회가 생길 수 있음!
+
+## 4. 통합 계획서 확인
 
 // turbo
 ```bash
@@ -35,17 +52,17 @@ cat docs/plans/PLAN_master.md | head -150
 - **현황 파악**: 전체 프로젝트 진행 상황 확인
 - **의존성 확인**: 시작하려는 작업의 선행 조건이 충족되었는지 확인
 
-## 4. 기능 계획서 작성
+## 5. 기능 계획서 작성
 
 **참조 문서**:
-- `docs/tamplates/SKILL.md` - 계획서 작성 가이드 (TDD, Quality Gate, Phase 구조)
-- `docs/tamplates/plan-template.md` - 계획서 템플릿
+- `docs/templates/SKILL.md` - 계획서 작성 가이드 (TDD, Quality Gate, Phase 구조)
+- `docs/templates/plan-template.md` - 계획서 템플릿
 
 **작성 위치**: `docs/plans/PLAN_[기능명].md`
 
 **필수 섹션**:
 - Overview (Feature Description, Success Criteria)
-- Architecture Decisions
+- Architecture Decisions ← **디자인 문서에서 결정한 내용 반영**
 - Dependencies
 - Test Strategy
 - Implementation Phases (각 Phase별 Tasks, Quality Gate)
@@ -57,7 +74,7 @@ cat docs/plans/PLAN_master.md | head -150
 - 의존성 그래프에 추가
 - 마일스톤에 연결 (해당 시)
 
-## 5. 기능 계획서 기반으로 구현
+## 6. 기능 계획서 기반으로 구현
 
 각 Phase별로 순차 진행:
 
@@ -84,7 +101,7 @@ poetry run pytest tests/ -v --tb=short
 - [ ] 계획서 "Last Updated" 날짜 업데이트
 - [ ] Phase 상태를 ✅ Complete로 변경
 
-## 6. CI 사전 검증 (모든 Phase 완료 후)
+## 7. CI 사전 검증 (모든 Phase 완료 후)
 
 모든 페이즈가 완료되면, PR 생성 전 로컬 환경에서 CI 요구사항을 충족하는지 최종 확인합니다.
 
@@ -96,7 +113,7 @@ cat .github/workflows/ci.yml
 
 **수동 검증 실행**: 위 파일에 정의된 스크립트(pytest, ruff 등)를 로컬에서 모두 실행하여 에러가 없는지 확인합니다.
 
-## 7. Git 커밋 및 푸시
+## 8. Git 커밋 및 푸시
 
 반복적인 커밋과 푸시를 통해 작업을 저장합니다.
 
@@ -122,7 +139,7 @@ git commit -m "feat: [계획서ID] [변경 내용 요약]
 git push -u origin feat/[계획서ID]-[기능명]
 ```
 
-## 8. PR 생성
+## 9. PR 생성
 
 **PR 제목 형식**:
 ```
@@ -154,7 +171,7 @@ feat: [계획서ID] [기능 요약]
 추가 정보
 ```
 
-## 9. 머지 후 정리
+## 10. 머지 후 정리
 
 - **통합 계획서 업데이트**: 진행률, 상태 변경
 - **main 브랜치 동기화**:
