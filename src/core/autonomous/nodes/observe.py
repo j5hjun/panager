@@ -57,7 +57,7 @@ async def observe_node_async(
 
     Args:
         state: 현재 에이전트 상태
-        weather_service: 캐시된 날씨 서비스 (CachedWeatherService)
+        weather_service: 날씨 서비스 (WeatherService)
         calendar_service: 일정 서비스 (CalendarService)
 
     Returns:
