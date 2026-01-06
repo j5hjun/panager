@@ -18,7 +18,6 @@ from src.adapters.slack.oauth_commands import SlackOAuthCommands
 from src.config.settings import get_settings
 
 # P-014: OAuth 모듈
-from src.core.auth.icloud_service import ICloudService
 from src.core.auth.oauth_service import OAuthService
 from src.core.auth.token_repository import TokenRepository
 from src.core.auth.token_scheduler import TokenRefreshScheduler
@@ -158,10 +157,6 @@ def main() -> None:
         oauth_service=oauth_service,
         token_repository=token_repository,
     )
-
-    # iCloud 서비스 설정
-    icloud_service = ICloudService(token_repository=token_repository)
-    oauth_commands.set_icloud_service(icloud_service)
 
     oauth_commands.register_commands(slack_handler.app)
     logger.info("✅ OAuth 명령어 등록 완료 (/connect, /disconnect, /accounts)")

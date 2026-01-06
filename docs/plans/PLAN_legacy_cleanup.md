@@ -225,14 +225,14 @@ class UserAlertSettings:
 
 **목표**: v3.0 이벤트 기반 아키텍처로 전환에 따라 불필요한 코드 삭제
 
-#### 6.1 iCloud 관련 코드 삭제
+#### 6.1 iCloud 관련 코드 삭제 ✅
 
 | 파일 | 상태 | 비고 |
 |------|------|------|
-| `src/core/auth/icloud_service.py` | ⏳ 삭제 예정 | Google Calendar만 사용 |
-| `tests/unit/core/auth/test_icloud_service.py` | ⏳ 삭제 예정 | |
-| `src/adapters/slack/oauth_commands.py` | ⏳ 수정 예정 | iCloud 관련 코드 제거 |
-| `src/main.py` | ⏳ 수정 예정 | iCloud 초기화 제거 |
+| `src/core/auth/icloud_service.py` | ✅ 삭제 완료 | Google Calendar만 사용 |
+| `tests/unit/core/auth/test_icloud_service.py` | ✅ 삭제 완료 | |
+| `src/adapters/slack/oauth_commands.py` | ✅ 수정 완료 | iCloud 관련 코드 제거 |
+| `src/main.py` | ✅ 수정 완료 | iCloud 초기화 제거 |
 
 #### 6.2 폴링 방식 스케줄러 삭제
 
@@ -249,19 +249,19 @@ class UserAlertSettings:
 | `src/config/settings.py` | ⏳ 수정 예정 | API 키 변경 |
 
 **Tasks**:
-- [ ] iCloud 서비스 파일 삭제
-- [ ] iCloud 테스트 파일 삭제
-- [ ] Slack OAuth 명령어에서 iCloud 제거
-- [ ] main.py에서 iCloud 관련 코드 제거
+- [x] iCloud 서비스 파일 삭제
+- [x] iCloud 테스트 파일 삭제
+- [x] Slack OAuth 명령어에서 iCloud 제거
+- [x] main.py에서 iCloud 관련 코드 제거
 - [ ] AdaptiveScheduler 처리 (삭제 또는 대체)
 - [ ] OpenWeatherMap 서비스 삭제
 - [ ] 기상청 API 서비스 구현
-- [ ] 테스트 실행 및 통과 확인
+- [x] 테스트 실행 및 통과 확인 (311 passed)
 
 **Quality Gate**:
-- [ ] 린트 통과 (`poetry run ruff check src/`)
-- [ ] 테스트 통과 (`poetry run pytest tests/`)
-- [ ] 삭제된 코드에 대한 import 에러 없음
+- [x] 린트 통과 (`poetry run ruff check src/`)
+- [x] 테스트 통과 (`poetry run pytest tests/`)
+- [x] 삭제된 코드에 대한 import 에러 없음
 
 ---
 
