@@ -21,7 +21,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
@@ -34,7 +34,7 @@ class TestSettings:
             assert settings.slack_bot_token == "xoxb-test-token"
             assert settings.slack_app_token == "xapp-test-token"
             assert settings.openai_api_key == "sk-test-key"
-            assert settings.openweathermap_api_key == "test-weather-key"
+            assert settings.kma_api_key == "test-weather-key"
 
     def test_settings_raises_error_when_required_fields_missing(self):
         """필수 설정이 누락되면 에러가 발생해야 함"""
@@ -55,7 +55,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
@@ -77,7 +77,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
             "LLM_MODEL": "gpt-4",
             "LLM_PROVIDER": "openai",
             "DEFAULT_CITY": "Busan",
@@ -102,7 +102,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
@@ -118,7 +118,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
             "LLM_PROVIDER": "groq",
         }
 
@@ -135,7 +135,7 @@ class TestSettings:
             "SLACK_BOT_TOKEN": "xoxb-test-token",
             "SLACK_APP_TOKEN": "xapp-test-token",
             "OPENAI_API_KEY": "sk-test-key",
-            "OPENWEATHERMAP_API_KEY": "test-weather-key",
+            "KMA_API_KEY": "test-weather-key",
             "LLM_PROVIDER": "openai",
         }
 

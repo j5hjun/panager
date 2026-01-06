@@ -22,7 +22,7 @@
 | `SLACK_BOT_TOKEN` | Slack Bot Token | `xoxb-...` |
 | `SLACK_APP_TOKEN` | Slack App Token | `xapp-...` |
 | `GROQ_API_KEY` | Groq LLM API Key | `gsk_...` |
-| `OPENWEATHERMAP_API_KEY` | 날씨 API Key | `abc123...` |
+| `KMA_API_KEY` | 기상청 API Key | `abc123...` |
 
 ### 선택 환경 변수
 
@@ -131,8 +131,8 @@ docker compose config
 
 ### 날씨 API 오류
 
-1. `OPENWEATHERMAP_API_KEY` 유효성 확인
-2. API 요청 제한 확인 (무료: 60회/분)
+1. `KMA_API_KEY` 유효성 확인 (공공데이터포털 발급)
+2. API 요청 제한 확인
 
 ---
 

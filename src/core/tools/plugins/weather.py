@@ -1,14 +1,14 @@
 """
 날씨 도구 플러그인
 
-OpenWeatherMap API를 사용하여 날씨 정보를 제공합니다.
+기상청 단기예보 API를 사용하여 날씨 정보를 제공합니다.
 """
 
 import logging
 from typing import Any
 
 from src.core.tools.base import BaseTool
-from src.services.weather.openweathermap import WeatherService
+from src.services.weather.kma_weather import WeatherService
 
 logger = logging.getLogger(__name__)
 

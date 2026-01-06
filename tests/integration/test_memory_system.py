@@ -10,7 +10,6 @@ from src.core.autonomous.memory.memory_manager import MemoryManager
 from src.core.autonomous.memory.notification_repository import NotificationRepository
 from src.core.autonomous.memory.pattern_analyzer import PatternAnalyzer
 from src.core.autonomous.memory.user_profile_repository import UserProfileRepository
-from src.core.autonomous.scheduler.adaptive_scheduler import AdaptiveScheduler
 
 
 class TestMemorySystemIntegration:
@@ -96,64 +95,6 @@ class TestMemorySystemIntegration:
         # 5. 확인
         context = memory_manager.get_user_context(user_id)
         assert "commute_time" in context["patterns"] or "interests" in context["patterns"]
-
-    def test_adaptive_scheduler_with_memory(self, memory_manager):
-        """유동적 스케줄러 + 메모리 통합"""
-        user_id = "U_TEST_003"
-
-        # 1. 유동적 스케줄러 생성
-        scheduler = AdaptiveScheduler(memory_manager=memory_manager)
-
-        # 2. 사용자 없으면 트리거 안 함
-        assert scheduler.should_run_now() is False
-
-        # 3. 사용자 생성 및 활동
-        scheduler.on_user_activity(user_id)
-
-        # 4. 패턴 설정
-        memory_manager.update_user_patterns(
-            user_id,
-            {"preferred_notification_times": ["08:00", "12:00", "18:00"]},
-        )
-
-        # 5. 다음 트리거 시간 계산
-        next_trigger = scheduler.get_next_trigger_time(user_id)
-        assert next_trigger is not None
-
-        # 6. 상태 확인
-        status = scheduler.get_status()
-        assert status["active_users"] >= 1
-
-    def test_notification_feedback_loop(self, memory_manager):
-        """알림 → 피드백 → 학습 루프"""
-        user_id = "U_TEST_004"
-        analyzer = PatternAnalyzer()
-
-        # 1. 알림 전송
-        memory_manager.record_notification(
-            user_id=user_id,
-            message="아침 날씨입니다",
-            notification_type="weather",
-        )
-        memory_manager.record_notification(
-            user_id=user_id,
-            message="점심 일정입니다",
-            notification_type="schedule",
-        )
-
-        # 2. 피드백 분석 (시뮬레이션)
-        notifications = [
-            {"sent_at": "08:00", "user_reaction": "positive"},
-            {"sent_at": "07:00", "user_reaction": "negative"},
-        ]
-        preferences = analyzer.analyze_notification_feedback(notifications)
-
-        # 3. 선호도 저장
-        memory_manager.update_user_patterns(user_id, preferences)
-
-        # 4. 확인
-        context = memory_manager.get_user_context(user_id)
-        assert "preferred_notification_times" in context["patterns"]
 
     def test_lesson_retrieval(self, memory_manager):
         """교훈 저장 및 조회"""

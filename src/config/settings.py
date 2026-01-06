@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     llm_model: str = Field(default="llama-3.3-70b-versatile", description="사용할 LLM 모델명")
 
     # ==================== 날씨 API 설정 ====================
-    openweathermap_api_key: str = Field(description="OpenWeatherMap API Key")
+    kma_api_key: str = Field(default="", description="기상청 공공데이터포털 API Key")
     default_city: str = Field(default="Seoul", description="기본 도시명")
 
     # ==================== Kakao Maps API 설정 ====================

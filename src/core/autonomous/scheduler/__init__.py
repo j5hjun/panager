@@ -1,9 +1,7 @@
 """
 스케줄러 모듈
 
-유동적 자율 판단 스케줄링을 제공합니다.
+v3.0에서 이벤트 기반 스케줄러로 대체될 예정입니다.
 """
 
-from src.core.autonomous.scheduler.adaptive_scheduler import AdaptiveScheduler
-
-__all__ = ["AdaptiveScheduler"]
+__all__: list[str] = []

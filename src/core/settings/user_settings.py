@@ -25,9 +25,6 @@ class UserAlertSettings:
     user_id: str
     channel_id: str = ""  # 알림을 받을 채널 (비어있으면 DM)
     city: str = "Seoul"  # 날씨 조회할 도시
-    morning_briefing_enabled: bool = True  # 아침 브리핑 활성화
-    morning_briefing_hour: int = 8  # 아침 브리핑 시간
-    morning_briefing_minute: int = 0
     weather_alert_enabled: bool = True  # 날씨 알림 활성화
     timezone: str = "Asia/Seoul"
 
@@ -37,9 +34,6 @@ class UserAlertSettings:
             "user_id": self.user_id,
             "channel_id": self.channel_id,
             "city": self.city,
-            "morning_briefing_enabled": self.morning_briefing_enabled,
-            "morning_briefing_hour": self.morning_briefing_hour,
-            "morning_briefing_minute": self.morning_briefing_minute,
             "weather_alert_enabled": self.weather_alert_enabled,
             "timezone": self.timezone,
         }
@@ -51,9 +45,6 @@ class UserAlertSettings:
             user_id=data.get("user_id", ""),
             channel_id=data.get("channel_id", ""),
             city=data.get("city", "Seoul"),
-            morning_briefing_enabled=data.get("morning_briefing_enabled", True),
-            morning_briefing_hour=data.get("morning_briefing_hour", 8),
-            morning_briefing_minute=data.get("morning_briefing_minute", 0),
             weather_alert_enabled=data.get("weather_alert_enabled", True),
             timezone=data.get("timezone", "Asia/Seoul"),
         )
@@ -163,30 +154,6 @@ class UserSettingsManager:
     def set_city(self, user_id: str, city: str) -> UserAlertSettings:
         """사용자 도시 설정"""
         return self.update_settings(user_id, city=city)
-
-    def set_morning_briefing(
-        self, user_id: str, enabled: bool, hour: int = 8, minute: int = 0
-    ) -> UserAlertSettings:
-        """아침 브리핑 설정"""
-        return self.update_settings(
-            user_id,
-            morning_briefing_enabled=enabled,
-            morning_briefing_hour=hour,
-            morning_briefing_minute=minute,
-        )
-
-    def get_all_users_with_morning_briefing(self) -> list[UserAlertSettings]:
-        """아침 브리핑이 활성화된 모든 사용자 조회"""
-        all_profiles = self._repository.get_all()
-        result = []
-
-        for profile in all_profiles:
-            user_id = profile["user_id"]
-            settings = self.get_settings(user_id)
-            if settings.morning_briefing_enabled:
-                result.append(settings)
-
-        return result
 
     def list_all_settings(self) -> list[UserAlertSettings]:
         """모든 사용자 설정 조회"""

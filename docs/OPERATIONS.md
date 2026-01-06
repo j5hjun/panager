@@ -178,7 +178,7 @@ docker compose up -d
 | API | 확인 방법 | 대응 |
 |-----|----------|------|
 | Groq | https://status.groq.com | 임시 대체 모델 사용 |
-| OpenWeatherMap | API 호출 테스트 | API 키 확인 |
+| 기상청 | API 호출 테스트 | KMA_API_KEY 확인 |
 | Slack | https://status.slack.com | 기다리기 |
 
 ---
