@@ -127,8 +127,8 @@ src/
 │
 └── services/
     └── weather/
-        ├── openweathermap.py   ❌ 삭제 예정 (기상청 API로 대체)
-        └── cached_weather.py   🔄 수정 예정
+        ├── kma_weather.py      ✅ 기상청 단기예보 API (신규)
+        └── cached_weather.py   ✅ 기상청 API 사용
 ```
 
 ---

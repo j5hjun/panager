@@ -359,7 +359,7 @@
 |----|----------|------|----------|
 | D-001 | Groq API | LLM 추론 | OpenAI, Anthropic, Ollama (로컬) |
 | D-002 | Slack API | 사용자 인터페이스 | Discord, Telegram |
-| D-003 | 기상청 API | 날씨 정보 | OpenWeatherMap |
+| D-003 | 기상청 API | 날씨 정보 | AccuWeather, World Weather Online |
 | D-004 | Kakao Maps API | 자동차 길찾기 | Naver Maps, Google Maps |
 | D-005 | ODsay API | 대중교통 길찾기 | TMAP API |
 | D-006 | Google Calendar API | 일정 연동 | - |
