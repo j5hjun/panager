@@ -22,7 +22,6 @@ from src.core.auth.oauth_service import OAuthService
 from src.core.auth.token_repository import TokenRepository
 from src.core.auth.token_scheduler import TokenRefreshScheduler
 from src.core.autonomous.memory.memory_manager import MemoryManager
-from src.core.autonomous.scheduler.adaptive_scheduler import AdaptiveScheduler
 from src.services.llm.ai_service import AIService
 from src.services.scheduler.scheduler import SchedulerService
 
@@ -168,14 +167,6 @@ def main() -> None:
     # AIService에 스케줄러 연동 (리마인더 기능용)
     ai_service.set_scheduler(scheduler, slack_handler.send_message)
     logger.info("🔗 리마인더 기능 활성화됨")
-
-    # P-011: 유동적 스케줄러 초기화
-    logger.info("🔄 유동적 스케줄러 초기화 중...")
-    adaptive_scheduler = AdaptiveScheduler(memory_manager=memory_manager)
-
-    # 활성 사용자 조회 및 상태 로깅
-    status = adaptive_scheduler.get_status()
-    logger.info(f"📊 스케줄러 상태: 활성 사용자 {status['active_users']}명")
 
     # 스케줄러 시작
     scheduler.start()
