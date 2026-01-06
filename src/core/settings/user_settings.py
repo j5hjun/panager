@@ -155,8 +155,6 @@ class UserSettingsManager:
         """사용자 도시 설정"""
         return self.update_settings(user_id, city=city)
 
-
-
     def list_all_settings(self) -> list[UserAlertSettings]:
         """모든 사용자 설정 조회"""
         all_profiles = self._repository.get_all()

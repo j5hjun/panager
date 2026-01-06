@@ -89,9 +89,7 @@ class SlackOAuthCommands:
 
         # 제공자 미입력
         if not provider:
-            respond(
-                text="📎 사용법: `/disconnect google`\n\n" "예시: `/disconnect google`"
-            )
+            respond(text="📎 사용법: `/disconnect google`\n\n" "예시: `/disconnect google`")
             return
 
         try:
@@ -126,8 +124,7 @@ class SlackOAuthCommands:
 
             if not tokens:
                 respond(
-                    text="📭 연결된 계정이 없습니다.\n\n"
-                    "`/connect google`로 계정을 연결하세요."
+                    text="📭 연결된 계정이 없습니다.\n\n" "`/connect google`로 계정을 연결하세요."
                 )
                 return
 

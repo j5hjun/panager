@@ -95,7 +95,6 @@ class TestWeatherService:
             assert "5" in formatted
 
 
-
 class TestWeatherEntity:
     """날씨 엔티티 테스트"""
 

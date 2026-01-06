@@ -240,7 +240,9 @@ class KMAWeatherService:
             # 응답 검증
             result_code = data.get("response", {}).get("header", {}).get("resultCode")
             if result_code != "00":
-                result_msg = data.get("response", {}).get("header", {}).get("resultMsg", "Unknown error")
+                result_msg = (
+                    data.get("response", {}).get("header", {}).get("resultMsg", "Unknown error")
+                )
                 logger.error(f"기상청 API 오류: {result_code} - {result_msg}")
                 raise ValueError(f"기상청 API 오류: {result_msg}")
 
@@ -251,10 +253,14 @@ class KMAWeatherService:
 
         except httpx.HTTPStatusError as e:
             logger.error(f"기상청 API HTTP 오류: {e}")
-            raise ValueError(f"날씨 정보를 가져오는 중 오류가 발생했습니다: {e.response.status_code}") from e
+            raise ValueError(
+                f"날씨 정보를 가져오는 중 오류가 발생했습니다: {e.response.status_code}"
+            ) from e
         except httpx.TimeoutException as e:
             logger.error("기상청 API 타임아웃")
-            raise ValueError("날씨 정보 조회 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.") from e
+            raise ValueError(
+                "날씨 정보 조회 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
+            ) from e
         except Exception as e:
             logger.error(f"날씨 조회 실패: {e}")
             raise ValueError(f"날씨 조회 중 예상치 못한 오류가 발생했습니다: {str(e)}") from e
@@ -298,7 +304,10 @@ class KMAWeatherService:
         weather = await self.get_weather_data(city)
 
         if weather.needs_umbrella():
-            return True, f"{weather.city}에 {weather.description} 예보가 있어요. 우산을 챙기세요! ☔"
+            return (
+                True,
+                f"{weather.city}에 {weather.description} 예보가 있어요. 우산을 챙기세요! ☔",
+            )
         else:
             return (
                 False,
