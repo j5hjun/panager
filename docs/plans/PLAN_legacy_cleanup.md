@@ -74,7 +74,7 @@ class UserSettings:
 | v1.0 초기 | 150 | - | - | 초기 구현 |
 | Phase 1-4 완료 | 150 | 3 | ~200 | Rule-based 기능 삭제 |
 | Phase 5 완료 | 317 | 7 | ~400 | 레거시 클래스 완전 삭제 |
-| Phase 6 완료 | 301 | 4 | ~1,300 | v3.0 전환 레거시 삭제 |
+| Phase 6 완료 | 270 | 12 | ~1,800 | v3.0 전환 + 캐시 삭제 |
 
 ---
 
@@ -93,6 +93,7 @@ class UserSettings:
 | iCloud 연동 | 2026-01-06 | 6 | Google Calendar 전용 |
 | `AdaptiveScheduler` (폴링 방식) | 2026-01-06 | 6 | 이벤트 기반 스케줄러 |
 | OpenWeatherMap API | 2026-01-06 | 6 | 기상청 API |
+| 캐시 시스템 (CacheService) | 2026-01-06 | 6 | 직접 API 호출 |
 
 ---
 
@@ -259,12 +260,25 @@ class UserAlertSettings:
 - [x] AdaptiveScheduler 삭제 완료
 - [x] OpenWeatherMap 서비스 삭제
 - [x] 기상청 API 서비스 구현 (`kma_weather.py`)
-- [x] 테스트 실행 및 통과 확인 (301 passed)
+- [x] 캐시 시스템 삭제
+- [x] 테스트 실행 및 통과 확인 (270 passed)
 
 **Quality Gate**:
 - [x] 린트 통과 (`poetry run ruff check src/`)
 - [x] 테스트 통과 (`poetry run pytest tests/`)
 - [x] 삭제된 코드에 대한 import 에러 없음
+
+#### 6.4 캐시 시스템 삭제 ✅
+
+| 파일 | 상태 | 비고 |
+|------|------|------|
+| `src/services/cache/` | ✅ 디렉토리 삭제 | CacheService, RefreshScheduler |
+| `src/services/weather/cached_weather.py` | ✅ 삭제 완료 | 직접 API 호출 |
+| `src/services/directions/cached_directions.py` | ✅ 삭제 완료 | 직접 API 호출 |
+| `src/core/entities/cache.py` | ✅ 삭제 완료 | CachedData 엔티티 |
+| `src/services/llm/ai_service.py` | ✅ 수정 완료 | 캐시 래퍼 제거 |
+| `tests/unit/services/test_cache*.py` | ✅ 삭제 완료 | 캐시 관련 테스트 |
+| `tests/unit/core/test_cache_entity.py` | ✅ 삭제 완료 | 캐시 엔티티 테스트 |
 
 ---
 
@@ -272,9 +286,10 @@ class UserAlertSettings:
 
 - **Phase 1-4**: v2.0 전환을 위해 Rule-based 기능 삭제 완료. DM 전용으로 단순화하여 코드 복잡도 감소.
 - **Phase 5**: 레거시 클래스 완전 삭제. 테스트 317개 전체 통과 확인.
-- **Phase 6**: v3.0 전환 완료. iCloud 제거, AdaptiveScheduler 삭제, 기상청 API 도입.
+- **Phase 6**: v3.0 전환 완료. iCloud 제거, AdaptiveScheduler 삭제, 기상청 API 도입, 캐시 삭제.
   - 공공데이터포털 API 키는 Decoding 키 사용 권장 (URL 인코딩 문제 방지)
-  - 테스트 317 → 301 (16개 레거시 테스트 삭제)
+  - 캐시 필요성이 낮아 삭제 (API Rate Limit 여유, 사용량 적음)
+  - 테스트 317 → 270 (47개 레거시 테스트 삭제)
 
 ---
 
