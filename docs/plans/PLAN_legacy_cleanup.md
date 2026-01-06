@@ -74,13 +74,13 @@ class UserSettings:
 | v1.0 초기 | 150 | - | - | 초기 구현 |
 | Phase 1-4 완료 | 150 | 3 | ~200 | Rule-based 기능 삭제 |
 | Phase 5 완료 | 317 | 7 | ~400 | 레거시 클래스 완전 삭제 |
-| Phase 6 예정 | TBD | TBD | TBD | v3.0 전환 레거시 삭제 |
+| Phase 6 완료 | 301 | 4 | ~1,300 | v3.0 전환 레거시 삭제 |
 
 ---
 
 ## � 현재 상태
 
-### 삭제 완료된 기능
+### 삭제 완료된 기능 (Phase 6 포함)
 
 | 기능 | 삭제 완료일 | Phase | 대체된 기능 |
 |------|-----------|-------|-----------|
@@ -90,14 +90,9 @@ class UserSettings:
 | `ProactiveAlertGenerator` 클래스 | 2026-01-06 | 5 | v2.0 자율 판단 시스템 |
 | `AlertTemplates` 클래스 | 2026-01-06 | 5 | v2.0 자율 판단 시스템 |
 | `morning_briefing` 설정 | 2026-01-06 | 5 | v2.0 자율 판단 시스템 |
-
-### 삭제 예정 기능 (Phase 6)
-
-| 기능 | 예정일 | Phase | 대체될 기능 |
-|------|-------|-------|-----------|
-| iCloud 연동 | 예정 | 6 | Google Calendar 전용 |
-| `AdaptiveScheduler` (폴링 방식) | 예정 | 6 | 이벤트 기반 스케줄러 |
-| OpenWeatherMap API | 예정 | 6 | 기상청 API |
+| iCloud 연동 | 2026-01-06 | 6 | Google Calendar 전용 |
+| `AdaptiveScheduler` (폴링 방식) | 2026-01-06 | 6 | 이벤트 기반 스케줄러 |
+| OpenWeatherMap API | 2026-01-06 | 6 | 기상청 API |
 
 ---
 
@@ -146,9 +141,9 @@ Phase 2: 멘션 핸들러 삭제      █████ 100% ✅ (2026-01-03)
 Phase 3: 아침 브리핑 삭제      █████ 100% ✅ (2026-01-03)
 Phase 4: 테스트/문서 정리      █████ 100% ✅ (2026-01-03)
 Phase 5: 레거시 클래스 삭제    █████ 100% ✅ (2026-01-06)
-Phase 6: v3.0 전환 레거시      ░░░░░   0% ⏳
+Phase 6: v3.0 전환 레거시      █████ 100% ✅ (2026-01-06)
 ────────────────────────────────────────────────
-Overall Progress:              ████░  85%
+Overall Progress:              █████ 100% ✅ Complete
 ```
 
 ---
@@ -244,13 +239,19 @@ class UserAlertSettings:
 | `tests/unit/core/autonomous/test_adaptive_scheduler.py` | ✅ 삭제 완료 | |
 | `tests/integration/test_memory_system.py` | ✅ 수정 완료 | AdaptiveScheduler 테스트 제거 |
 
-#### 6.3 OpenWeatherMap → 기상청 API 전환
+#### 6.3 OpenWeatherMap → 기상청 API 전환 ✅
 
 | 파일 | 상태 | 비고 |
 |------|------|------|
-| `src/services/weather/openweathermap.py` | ⏳ 삭제 예정 | 기상청 API로 대체 |
-| `src/services/weather/cached_weather.py` | ⏳ 수정 예정 | 기상청 API 사용 |
-| `src/config/settings.py` | ⏳ 수정 예정 | API 키 변경 |
+| `src/services/weather/openweathermap.py` | ✅ 삭제 완료 | 기상청 API로 대체 |
+| `src/services/weather/kma_weather.py` | ✅ 신규 생성 | 기상청 단기예보 API |
+| `src/services/weather/cached_weather.py` | ✅ 수정 완료 | 기상청 API 사용 |
+| `src/core/tools/plugins/weather.py` | ✅ 수정 완료 | 기상청 API 사용 |
+| `src/services/llm/ai_service.py` | ✅ 수정 완료 | 기상청 API 사용 |
+| `src/config/settings.py` | ✅ 수정 완료 | `kma_api_key` 추가 |
+| `src/main.py` | ✅ 수정 완료 | `kma_api_key` 사용 |
+| `tests/unit/services/test_weather.py` | ✅ 수정 완료 | 기상청 API 테스트 |
+| `tests/unit/test_config.py` | ✅ 수정 완료 | `kma_api_key` 테스트 |
 
 **Tasks**:
 - [x] iCloud 서비스 파일 삭제
@@ -258,8 +259,8 @@ class UserAlertSettings:
 - [x] Slack OAuth 명령어에서 iCloud 제거
 - [x] main.py에서 iCloud 관련 코드 제거
 - [x] AdaptiveScheduler 삭제 완료
-- [ ] OpenWeatherMap 서비스 삭제
-- [ ] 기상청 API 서비스 구현
+- [x] OpenWeatherMap 서비스 삭제
+- [x] 기상청 API 서비스 구현 (`kma_weather.py`)
 - [x] 테스트 실행 및 통과 확인 (301 passed)
 
 **Quality Gate**:

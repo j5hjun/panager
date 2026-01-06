@@ -133,7 +133,7 @@ def main() -> None:
         base_url=settings.llm_base_url,
         model=settings.llm_model,
         assistant_name=settings.assistant_name,
-        weather_api_key=settings.openweathermap_api_key,
+        weather_api_key=settings.kma_api_key,
         default_city=settings.default_city,
         kakao_api_key=settings.kakao_rest_api_key or None,
     )

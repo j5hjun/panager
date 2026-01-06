@@ -34,7 +34,7 @@ class TestSettings:
             assert settings.slack_bot_token == "xoxb-test-token"
             assert settings.slack_app_token == "xapp-test-token"
             assert settings.openai_api_key == "sk-test-key"
-            assert settings.openweathermap_api_key == "test-weather-key"
+            assert settings.kma_api_key == "test-weather-key"
 
     def test_settings_raises_error_when_required_fields_missing(self):
         """필수 설정이 누락되면 에러가 발생해야 함"""

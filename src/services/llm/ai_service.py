@@ -20,7 +20,7 @@ from src.services.directions.cached_directions import CachedDirectionsService
 from src.services.directions.kakao_maps import DirectionsService
 from src.services.llm.client import LLMClient
 from src.services.weather.cached_weather import CachedWeatherService
-from src.services.weather.openweathermap import WeatherService
+from src.services.weather.kma_weather import WeatherService
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class AIService:
             model: 사용할 모델명
             assistant_name: AI 비서 이름
             max_history: 사용자당 최대 대화 기록 수
-            weather_api_key: OpenWeatherMap API 키
+            weather_api_key: 기상청 공공데이터포털 API 키
             default_city: 기본 도시명
             calendar_db_path: 일정 DB 경로
             kakao_api_key: Kakao REST API 키 (길찾기용)

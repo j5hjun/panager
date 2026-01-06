@@ -1,7 +1,7 @@
 """
 날씨 서비스 테스트
 
-TDD RED Phase: 날씨 서비스가 구현되기 전에 작성된 테스트
+기상청 단기예보 API를 사용하는 날씨 서비스 테스트
 """
 
 from unittest.mock import AsyncMock, patch
@@ -14,13 +14,13 @@ class TestWeatherService:
 
     def test_weather_service_can_be_imported(self):
         """WeatherService 클래스를 import할 수 있어야 함"""
-        from src.services.weather.openweathermap import WeatherService
+        from src.services.weather.kma_weather import WeatherService
 
         assert WeatherService is not None
 
     def test_weather_service_initialization(self):
         """WeatherService를 초기화할 수 있어야 함"""
-        from src.services.weather.openweathermap import WeatherService
+        from src.services.weather.kma_weather import WeatherService
 
         service = WeatherService(api_key="test-api-key")
 
@@ -30,16 +30,26 @@ class TestWeatherService:
     @pytest.mark.asyncio
     async def test_get_current_weather(self):
         """현재 날씨를 조회할 수 있어야 함"""
-        from src.services.weather.openweathermap import WeatherService
+        from src.services.weather.kma_weather import WeatherService
 
         service = WeatherService(api_key="test-api-key")
 
-        # Mock HTTP response
+        # Mock 기상청 API 응답
         mock_response = {
-            "main": {"temp": 5.5, "humidity": 60, "feels_like": 3.2},
-            "weather": [{"main": "Clear", "description": "맑음"}],
-            "wind": {"speed": 2.5},
-            "name": "Seoul",
+            "response": {
+                "header": {"resultCode": "00", "resultMsg": "NORMAL_SERVICE"},
+                "body": {
+                    "items": {
+                        "item": [
+                            {"category": "T1H", "fcstValue": "5"},
+                            {"category": "REH", "fcstValue": "60"},
+                            {"category": "SKY", "fcstValue": "1"},
+                            {"category": "PTY", "fcstValue": "0"},
+                            {"category": "WSD", "fcstValue": "2.5"},
+                        ]
+                    }
+                },
+            }
         }
 
         with patch.object(service, "_fetch_weather", new_callable=AsyncMock) as mock_fetch:
@@ -49,21 +59,31 @@ class TestWeatherService:
 
             assert weather is not None
             assert weather["city"] == "Seoul"
-            assert weather["temperature"] == 5.5
+            assert weather["temperature"] == 5.0
             assert weather["description"] == "맑음"
 
     @pytest.mark.asyncio
     async def test_get_weather_formatted(self):
         """포맷된 날씨 정보를 반환할 수 있어야 함"""
-        from src.services.weather.openweathermap import WeatherService
+        from src.services.weather.kma_weather import WeatherService
 
         service = WeatherService(api_key="test-api-key")
 
         mock_response = {
-            "main": {"temp": 5.5, "humidity": 60, "feels_like": 3.2},
-            "weather": [{"main": "Clear", "description": "맑음"}],
-            "wind": {"speed": 2.5},
-            "name": "Seoul",
+            "response": {
+                "header": {"resultCode": "00", "resultMsg": "NORMAL_SERVICE"},
+                "body": {
+                    "items": {
+                        "item": [
+                            {"category": "T1H", "fcstValue": "5"},
+                            {"category": "REH", "fcstValue": "60"},
+                            {"category": "SKY", "fcstValue": "1"},
+                            {"category": "PTY", "fcstValue": "0"},
+                            {"category": "WSD", "fcstValue": "2.5"},
+                        ]
+                    }
+                },
+            }
         }
 
         with patch.object(service, "_fetch_weather", new_callable=AsyncMock) as mock_fetch:
@@ -72,7 +92,8 @@ class TestWeatherService:
             formatted = await service.get_weather_formatted("Seoul")
 
             assert "Seoul" in formatted or "서울" in formatted
-            assert "5.5" in formatted or "5" in formatted
+            assert "5" in formatted
+
 
 
 class TestWeatherEntity:

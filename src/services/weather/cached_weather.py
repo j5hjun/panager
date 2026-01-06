@@ -10,7 +10,7 @@ from typing import Any
 from src.core.entities.cache import generate_cache_key
 from src.core.entities.weather import WeatherData
 from src.services.cache.sqlite_cache import CacheService
-from src.services.weather.openweathermap import WeatherService
+from src.services.weather.kma_weather import WeatherService
 
 logger = logging.getLogger(__name__)
 
