@@ -1,8 +1,9 @@
-# ==================== Python ====================
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,52 +17,74 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# ==================== 가상환경 ====================
+# Poetry
+*.lock
 .venv/
-venv/
-ENV/
-env/
 
-# ==================== IDE ====================
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-.DS_Store
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
 
-# ==================== 테스트 ====================
-.pytest_cache/
-.coverage
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
 htmlcov/
 .tox/
 .nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
 
-# ==================== mypy ====================
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Models
+*.mo
+*.pot
+
+# Environments
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# ==================== ruff ====================
-.ruff_cache/
+# Pyre type checker
+.pyre/
 
-# ==================== 환경 변수 ====================
-.env
-.env.local
-.env.*.local
-
-# ==================== 데이터 ====================
-data/*.db
-data/*.sqlite
-*.log
-
-# ==================== 기타 ====================
-*.bak
-*.tmp
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
