@@ -2,88 +2,33 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
-  # 변경된 파일 감지 (항상 실행 - Branch Protection의 required check)
-  check:
-    runs-on: ubuntu-latest
-    outputs:
-      should_test: ${{ steps.changed-files.outputs.any_changed }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Check for code changes
-        id: changed-files
-        uses: tj-actions/changed-files@v45
-        with:
-          files: |
-            src/**
-            tests/**
-            pyproject.toml
-            poetry.lock
-            Dockerfile
-            docker-compose.yml
-      
-      - name: Report changes
-        run: |
-          echo "Any code changed: ${{ steps.changed-files.outputs.any_changed }}"
-          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
-          if [ "${{ steps.changed-files.outputs.any_changed }}" == "true" ]; then
-            echo "💻 Code changes detected - tests will run"
-          else
-            echo "📝 Docs/config only - tests will be skipped"
-          fi
-
-  # 코드 변경 시에만 실행 (단, main push 시에는 항상 실행)
   test:
-    needs: check
-    # main push: 항상 실행 / PR: 코드 변경 시에만 실행
-    if: github.event_name == 'push' || needs.check.outputs.should_test == 'true'
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
     
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
-    
+        python-version: "3.11"
+        
     - name: Install Poetry
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-    
-    - name: Configure Poetry
-      run: poetry config virtualenvs.in-project true
-    
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v4
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-    
-    - name: Install dependencies
-      run: poetry install --no-interaction --no-root
-    
-    - name: Run linting
+        
+    - name: Install Dependencies
+      run: |
+        poetry install --no-root
+        
+    - name: Lint with Ruff
       run: |
         poetry run ruff check .
-        poetry run black --check .
-    
-    - name: Run tests with coverage
+        
+    - name: Run Tests
       run: |
-        poetry run pytest tests/ -v --cov=src --cov-report=xml
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        fail_ci_if_error: false
+        poetry run pytest

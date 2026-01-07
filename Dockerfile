@@ -1,60 +1,29 @@
-# ==================== Stage 1: Builder ====================
-FROM python:3.11-slim AS builder
+# Build stage
+FROM python:3.11-slim as builder
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-
-# Set working directory
 WORKDIR /app
 
-# Copy dependency files
+# Poetry 설치
+RUN pip install poetry
+
+# 의존성 파일 복사
 COPY pyproject.toml poetry.lock ./
 
-# Install dependencies (no dev dependencies)
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi --no-root --only main
+# 가상환경 생성 방지 및 패키지 설치
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-root --without dev
 
-# ==================== Stage 2: Runtime ====================
+# Runtime stage
 FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    TZ=Asia/Seoul
-
-# Install runtime dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
 WORKDIR /app
 
-# Copy Python packages from builder
+# 빌드 스테이지에서 설치된 패키지 복사
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy application code
+# 소스 코드 복사
 COPY src/ ./src/
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data
-
-# Run as non-root user
-RUN useradd -m -u 1000 panager && \
-    chown -R panager:panager /app
-USER panager
-
-# Health check (optional)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)"
-
-# Run application
-CMD ["python", "-m", "src.main"]
+# 실행
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
