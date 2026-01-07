@@ -17,5 +17,5 @@ class EventRepository(ABC):
         pass
 
     @abstractmethod
-    async def save(self, event: CalendarEvent) -> CalendarEvent:
+    async def save(self, event: CalendarEvent, user_id: int) -> CalendarEvent:
         pass
