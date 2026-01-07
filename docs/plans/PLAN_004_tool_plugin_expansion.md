@@ -1,7 +1,7 @@
 # Implementation Plan: Tool Plugin 확장 시스템
 
 **Status**: 🔄 In Progress
-**Plan ID**: P-004
+**Plan ID**: PLAN_004
 **Started**: 2025-12-29
 **Last Updated**: 2025-12-29
 **Estimated Completion**: 2026-01-12 (약 2주)

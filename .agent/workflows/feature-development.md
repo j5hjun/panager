@@ -22,8 +22,8 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 3. **브랜치 생성**:
    - 할당받은 ID와 기능명을 조합하여 브랜치를 생성합니다.
    ```bash
-   git checkout -b feat/[계획서ID]-[기능명]
-   # 예: git checkout -b feat/p-005-calendar-integration
+   git checkout -b feat/PLAN_XXX-[기능명]
+   # 예: git checkout -b feat/PLAN_009-calendar-integration
    ```
 
 ## 2. 디자인 문서 작성 (Design Options)
@@ -31,7 +31,8 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 구현 방법을 결정하기 위해 AI가 여러 대안을 분석합니다.
 
 **참조 템플릿**: `docs/templates/TEMPLATE_design_options.md`
-**작성 위치**: `docs/designs/DO_[기능명].md`
+**작성 위치**: `docs/designs/DO_XXX_[기능명].md`
+예: `docs/designs/DO_009_calendar_integration.md`
 
 **프로세스**:
 1. 사용자가 기능 목표 설명
@@ -47,8 +48,8 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 
 구현할 기능이 아키텍처에 맞게 연결될 수 있도록 작성합니다.
 
-**작성 위치**: `docs/plans/PLAN_[계획서ID]_[기능명].md`
-예: `docs/plans/PLAN_P-015_user_preferences.md`
+**작성 위치**: `docs/plans/PLAN_XXX_[기능명].md`
+예: `docs/plans/PLAN_015_user_preferences.md`
 
 **참조 문서**:
 - `docs/templates/SKILL.md`
@@ -77,8 +78,8 @@ description: 새 기능 개발 시 따라야 할 전체 워크플로우 (요구�
 
 **PR 제목 형식**:
 ```
-feat: [계획서ID] [기능 요약]
-# 예: feat: P-013 외부 캘린더 연동 (Google/iCloud)
+feat: [PLAN_XXX] [기능 요약]
+# 예: feat: PLAN_013 외부 캘린더 연동 (Google)
 ```
 
 **PR 템플릿**:
@@ -95,5 +96,5 @@ git pull origin main
 ```
 - **로컬 브랜치 삭제**:
 ```bash
-git branch -d feat/[계획서ID]-[기능명]
+git branch -d feat/PLAN_XXX-[기능명]
 ```

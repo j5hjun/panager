@@ -1,7 +1,7 @@
 # Implementation Plan: 통합형 능동적 AI 비서 "패니저"
 
 **Status**: ✅ Complete
-**Plan ID**: P-001
+**Plan ID**: PLAN_001
 **Started**: 2025-12-28
 **Last Updated**: 2026-01-02
 **Estimated Completion**: 2025-01-15 (약 3주)
