@@ -15,7 +15,7 @@
 
 ### Feature Description
 Core Domain에서 정의한 Repository Interface(`User`, `Token`, `Event`)를 구현하는 인프라스트럭처 레어어를 구축합니다.
-**DO_002** 결정에 따라 **PostgreSQL**을 데이터베이스로 사용하며, **SQLAlchemy (Async)**와 **Alembic**으로 관리합니다.
+**DO_003** 결정에 따라 **PostgreSQL**을 데이터베이스로 사용하며, **SQLAlchemy (Async)**와 **Alembic**으로 관리합니다.
 
 ### Success Criteria
 - [ ] `docker-compose` 환경에 PostgreSQL 컨테이너 추가 및 구동 확인
@@ -95,4 +95,4 @@ Phase 3: Repositories   ⬜⬜⬜⬜⬜ 0%
 
 ## 🔗 Related Documents
 - [PLAN_002_core_domain.md](./PLAN_002_core_domain.md)
-- [DO_002_persistence_strategy.md](../designs/DO_002_persistence_strategy.md)
+- [DO_003_persistence_strategy.md](../designs/DO_003_persistence_strategy.md)
