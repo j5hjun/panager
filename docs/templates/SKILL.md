@@ -44,7 +44,7 @@ Break feature into 3-7 phases where each phase:
 - **Coverage Target**: Specific percentage or checklist for this phase
 
 ### Step 3: Plan Document Creation
-Use plan-template.md to generate: `docs/plans/PLAN_<feature-name>.md`
+Use plan-template.md to generate: `docs/plans/PLAN_<plan-id>_<feature-name>.md`
 
 Include:
 - Overview and objectives

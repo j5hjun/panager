@@ -34,11 +34,19 @@ git checkout -b feature/기능이름
 
 ### 3. 작업 및 커밋
 ```bash
-# 변경 사항 추가
-git add .
+# 변경된 파일 확인
+git status
 
-# 커밋 (Conventional Commits 형식)
-git commit -m "feat: 새로운 기능 추가"
+# 의도한 파일만 명시적으로 지정하여 스테이징 (전체 추가 지양)
+git add [파일경로1] [파일경로2]
+# 예: git add src/main.py tests/test_main.py
+
+git commit -m "feat: [계획서ID] [변경 내용 요약]
+
+- 변경사항 1
+- 변경사항 2
+
+[계획서ID]: [상태]"
 ```
 
 **커밋 메시지 규칙:**
@@ -52,7 +60,7 @@ git commit -m "feat: 새로운 기능 추가"
 
 ### 4. 원격에 푸시
 ```bash
-git push -u origin feature/기능이름
+git push -u origin feat/[계획서ID]-[기능명]
 ```
 
 ### 5. PR (Pull Request) 생성

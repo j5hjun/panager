@@ -1,7 +1,7 @@
 # Implementation Plan: 자율 판단 코어 (Autonomous Core)
 
 **Status**: ✅ Completed
-**Plan ID**: P-010
+**Plan ID**: P-006
 **Started**: 2026-01-04
 **Last Updated**: 2026-01-04
 **Estimated Completion**: 3-5일
@@ -57,7 +57,7 @@ LangGraph 기반의 **Observe-Think-Act-Reflect** 루프를 통해 LLM이 스스
 - [x] AutonomousRunner 클래스 구현
 - [x] 모든 테스트 통과 (223 passed)
 
-> **Note**: 유동적 실행 주기는 P-011 메모리 시스템에서 구현 예정
+> **Note**: 유동적 실행 주기는 P-007 메모리 시스템에서 구현 예정
 
 ### Related Requirements
 
@@ -147,8 +147,8 @@ poetry add langgraph
 ```
 
 ### 후속 작업
-- P-011 (Memory System): 이 작업 완료 후 진행
-- P-012 (Prompt Engineering): 이 작업 완료 후 진행
+- P-007 (Memory System): 이 작업 완료 후 진행
+- P-008 (Prompt Engineering): 이 작업 완료 후 진행
 
 ---
 
@@ -291,7 +291,7 @@ poetry add langgraph
 
 **Scope 조정**:
 > 고정 5분 주기 스케줄링은 제외.
-> 유동적 실행 주기(사용자 데이터 기반)는 P-011 메모리 시스템에서 구현 예정.
+> 유동적 실행 주기(사용자 데이터 기반)는 P-007 메모리 시스템에서 구현 예정.
 
 ---
 
@@ -312,8 +312,8 @@ poetry add langgraph
 
 ```bash
 # Phase별 커밋
-git commit -m "feat(P-010): Phase 1 - AgentState 기본 구조"
-git commit -m "feat(P-010): Phase 2 - Observe 노드"
+git commit -m "feat(P-006): Phase 1 - AgentState 기본 구조"
+git commit -m "feat(P-006): Phase 2 - Observe 노드"
 ...
 
 # 문제 발생 시 롤백
@@ -350,7 +350,7 @@ Total:                    █████ 100% ✅
 - Reflect 노드: 긍정 키워드 먼저 체크 (순서 중요)
 - AutonomousRunner: 비동기 노드 오케스트레이션
 - 총 223개 테스트 통과
-- **Scope 조정**: 고정 주기 스케줄링 제외, 유동적 주기는 P-011에서 구현
+- **Scope 조정**: 고정 주기 스케줄링 제외, 유동적 주기는 P-007에서 구현
 
 ---
 

@@ -1,6 +1,7 @@
 # Implementation Plan: [Feature Name]
 
 **Status**: 🔄 In Progress
+**Plan ID**: [Plan ID]
 **Started**: YYYY-MM-DD
 **Last Updated**: YYYY-MM-DD
 **Estimated Completion**: YYYY-MM-DD

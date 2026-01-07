@@ -1,6 +1,7 @@
 # Implementation Plan: Git 워크플로우 개선
 
 **Status**: ✅ Complete
+**Plan ID**: P-003
 **Started**: 2025-12-29
 **Last Updated**: 2026-01-01
 **Completed**: 2026-01-01
