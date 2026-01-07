@@ -18,9 +18,9 @@ Panager의 핵심 비즈니스 로직을 담을 **Domain Layer**를 구현합니
 Clean Architecture 원칙에 따라, 이 계층은 외부 라이브러리(Slack SDK, SQLAlchemy 등)에 의존하지 않는 순수한 Python 객체(POJO/Pydantic)로 구성됩니다.
 
 ### Success Criteria
-- [ ] 핵심 엔티티(`User`, `Token`, `Event`)가 Pydantic 모델로 정의됨
-- [ ] 데이터 접근을 위한 추상 인터페이스(Ports)가 정의됨 (`UserRepository`, `TokenRepository`)
-- [ ] 엔티티의 유효성 검사 및 비즈니스 로직에 대한 단위 테스트 통과
+- [x] 핵심 엔티티(`User`, `Token`, `Event`)가 Pydantic 모델로 정의됨
+- [x] 데이터 접근을 위한 추상 인터페이스(Ports)가 정의됨 (`UserRepository`, `TokenRepository`)
+- [x] 엔티티의 유효성 검사 및 비즈니스 로직에 대한 단위 테스트 통과
 
 ---
 
