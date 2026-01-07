@@ -21,11 +21,12 @@ git pull origin main
 
 ### 2. Feature 브랜치 생성
 ```bash
-git checkout -b feature/기능이름
+git checkout -b feat/PLAN_XXX-기능이름
+# 예: git checkout -b feat/PLAN_009-calendar-integration
 ```
 
 **브랜치 네이밍 규칙:**
-- `feature/` - 새 기능 (예: `feature/calendar-tool`)
+- `feat/PLAN_XXX-기능명` - 새 기능 (예: `feat/PLAN_009-calendar-integration`)
 - `fix/` - 버그 수정 (예: `fix/api-timeout`)
 - `refactor/` - 리팩토링 (예: `refactor/tool-registry`)
 - `docs/` - 문서 작업 (예: `docs/readme-update`)
@@ -34,11 +35,19 @@ git checkout -b feature/기능이름
 
 ### 3. 작업 및 커밋
 ```bash
-# 변경 사항 추가
-git add .
+# 변경된 파일 확인
+git status
 
-# 커밋 (Conventional Commits 형식)
-git commit -m "feat: 새로운 기능 추가"
+# 의도한 파일만 명시적으로 지정하여 스테이징 (전체 추가 지양)
+git add [파일경로1] [파일경로2]
+# 예: git add src/main.py tests/test_main.py
+
+git commit -m "feat: [PLAN_XXX] [변경 내용 요약]
+
+- 변경사항 1
+- 변경사항 2
+
+[PLAN_XXX]: [상태]"
 ```
 
 **커밋 메시지 규칙:**
@@ -52,7 +61,7 @@ git commit -m "feat: 새로운 기능 추가"
 
 ### 4. 원격에 푸시
 ```bash
-git push -u origin feature/기능이름
+git push -u origin feat/[PLAN_XXX]-[기능명]
 ```
 
 ### 5. PR (Pull Request) 생성
@@ -131,5 +140,5 @@ git log --oneline -10
 
 ## 🔗 관련 문서
 
-- [계획서](../docs/plans/PLAN_git_workflow_improvement.md)
+- [계획서](../docs/plans/PLAN_003_git_workflow_improvement.md)
 - [CONTRIBUTING.md](../CONTRIBUTING.md)

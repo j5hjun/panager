@@ -1,11 +1,11 @@
 # Implementation Plan: 다중 사용자 시스템
 
 **Status**: ✅ Complete
-**Plan ID**: P-012
+**Plan ID**: PLAN_008
 **Started**: 2026-01-05
 **Last Updated**: 2026-01-05
 **Completed**: 2026-01-05
-**Dependencies**: P-011 (메모리 시스템)
+**Dependencies**: PLAN_007 (메모리 시스템)
 
 ---
 
@@ -28,7 +28,7 @@
 **다중 사용자 환경**에서 각 사용자별 외부 서비스 인증 정보(OAuth 토큰)를 안전하게 저장하고 관리합니다.
 
 이 시스템은 다음 기능을 위한 **기반 인프라**입니다:
-- P-013: 외부 캘린더 연동 (Google Calendar, iCloud)
+- PLAN_009: 외부 캘린더 연동 (Google Calendar, iCloud)
 - 향후: 다른 OAuth 기반 서비스 연동
 
 ### Success Criteria
@@ -81,7 +81,7 @@
 ## 📦 Dependencies
 
 ### Required Before Starting
-- [x] P-011 메모리 시스템 완료
+- [x] PLAN_007 메모리 시스템 완료
 - [x] 배포 서버 8080 포트 오픈 (docker-compose.yml)
 - [x] OAuth redirect_uri 도메인 설정 (.env.example)
 
@@ -407,8 +407,8 @@ docker-compose.local.yml       # 8080 포트 노출
 ## 🔗 Related Documents
 
 - [PLAN_master.md](./PLAN_master.md) - 통합 계획서
-- [PLAN_memory_system.md](./PLAN_memory_system.md) - 메모리 시스템 (P-011)
-- [PLAN_calendar_integration.md](./PLAN_calendar_integration.md) - 캘린더 연동 (P-013, 이 계획 완료 후)
+- [PLAN_memory_system.md](./PLAN_memory_system.md) - 메모리 시스템 (PLAN_007)
+- [PLAN_calendar_integration.md](./PLAN_calendar_integration.md) - 캘린더 연동 (PLAN_009, 이 계획 완료 후)
 
 ---
 
@@ -421,7 +421,7 @@ docker-compose.local.yml       # 8080 포트 노출
 - [x] 토큰 갱신 테스트 (단위 테스트)
 - [x] 문서 업데이트 (.env.example)
 - [x] PLAN_master.md 업데이트
-- [x] P-013 Blocked 해제 (PLAN_master.md에 등록됨)
+- [x] PLAN_009 Blocked 해제 (PLAN_master.md에 등록됨)
 
 ---
 

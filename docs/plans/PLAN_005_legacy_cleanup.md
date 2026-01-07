@@ -1,7 +1,7 @@
 # Implementation Plan: 레거시 코드 정리
 
 **Status**: ✅ Completed  
-**Plan ID**: P-009  
+**Plan ID**: PLAN_005  
 **Started**: 2026-01-03  
 **Completed**: 2026-01-06  
 
