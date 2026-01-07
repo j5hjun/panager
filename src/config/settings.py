@@ -13,9 +13,12 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     google_api_key: str = ""
 
+    # Database
+    db_url: str = "postgresql+asyncpg://panager:password@localhost:5432/panager_dev"
+
     # Config
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env.local", ".env"),  # .env.local 우선
         env_file_encoding="utf-8",
         extra="ignore"  # 정의되지 않은 환경변수는 무시
     )
