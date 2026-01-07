@@ -15,6 +15,11 @@ from src.infrastructure.google.calendar_adapter import GoogleCalendarAdapter
 from src.infrastructure.google.auth import GoogleAuthManager
 from src.infrastructure.slack.slack_adapter import SlackAdapter
 
+# Application Services
+from src.application.services.auth_service import UserAuthService
+from src.application.services.sync_service import CalendarSyncService
+from src.application.services.notification_service import NotificationService
+
 
 @lru_cache()
 def get_settings() -> Settings:
@@ -88,6 +93,25 @@ class Container:
             settings=self.settings
         )
 
+    # === Application Services ===
+
+    def get_auth_service(self, session) -> UserAuthService:
+        """UserAuthService 생성"""
+        user_repo = self.get_user_repository(session)
+        auth_manager = self.get_google_auth_manager(session)
+        return UserAuthService(user_repo, auth_manager)
+
+    def get_sync_service(self, session) -> CalendarSyncService:
+        """CalendarSyncService 생성"""
+        calendar_adapter = self.google_calendar_adapter
+        event_repo = self.get_event_repository(session)
+        user_repo = self.get_user_repository(session)
+        return CalendarSyncService(calendar_adapter, event_repo, user_repo)
+
+    def get_notification_service(self) -> NotificationService:
+        """NotificationService 생성"""
+        return NotificationService(self.slack_adapter)
+
 
 # === FastAPI Depends 헬퍼 ===
 
@@ -125,3 +149,23 @@ async def get_slack_adapter() -> SlackAdapter:
 async def get_calendar_adapter() -> GoogleCalendarAdapter:
     """FastAPI Depends용 GoogleCalendarAdapter"""
     return Container.get_instance().google_calendar_adapter
+
+
+async def get_auth_service():
+    """FastAPI Depends용 UserAuthService"""
+    container = Container.get_instance()
+    async for session in get_db():
+        yield container.get_auth_service(session)
+
+
+async def get_sync_service():
+    """FastAPI Depends용 CalendarSyncService"""
+    container = Container.get_instance()
+    async for session in get_db():
+        yield container.get_sync_service(session)
+
+
+async def get_notification_service() -> NotificationService:
+    """FastAPI Depends용 NotificationService"""
+    container = Container.get_instance()
+    return container.get_notification_service()

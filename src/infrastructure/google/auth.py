@@ -171,3 +171,26 @@ class GoogleAuthManager:
         
         query = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{base_url}?{query}"
+
+    async def exchange_code(self, code: str) -> Optional[dict]:
+        """
+        인증 코드를 액세스 토큰으로 교환합니다.
+        
+        Args:
+            code: 인증 코드
+            
+        Returns:
+            토큰 정보 Dictionary 또는 None
+        """
+        try:
+            from aiogoogle import Aiogoogle
+            
+            async with Aiogoogle(client_creds=self.client_creds) as aiogoogle:
+                token_response = await aiogoogle.oauth2.build_user_creds(
+                    grant=code,
+                    client_creds=self.client_creds
+                )
+                return token_response
+        except Exception as e:
+            print(f"Token exchange failed: {e}")
+            return None
