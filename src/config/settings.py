@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     # Slack
     slack_bot_token: str = ""
     slack_app_token: str = ""
+    slack_signing_secret: str = ""
     
     # Google OAuth
     google_client_id: str = ""
@@ -17,6 +18,9 @@ class Settings(BaseSettings):
     # LLM
     openai_api_key: str = ""
     google_api_key: str = ""
+    
+    # Infrastructure
+    redis_url: str = "redis://localhost:6379"
 
     # Database
     db_url: str = "postgresql+asyncpg://panager:password@localhost:5432/panager_dev"

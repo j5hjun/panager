@@ -25,5 +25,14 @@ services:
     env_file:
       - .env.local
 
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_local:/data
+
 volumes:
   postgres_data_local: {}
+  redis_data_local: {}
