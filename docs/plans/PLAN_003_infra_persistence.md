@@ -1,4 +1,4 @@
-# Implementation Plan: Infrastructure Persistence (PostgreSQL)
+# Implementation Plan: 인프라 영속성 구축 (PostgreSQL)
 
 **Status**: 🔄 In Progress
 **Plan ID**: PLAN_003
@@ -8,39 +8,39 @@
 
 ---
 
-**⚠️ CRITICAL INSTRUCTIONS**: After completing each phase:
-1. ✅ Check off completed task checkboxes
-2. 🧪 Run all quality gate validation commands
-3. ⚠️ Verify ALL quality gate items pass
-4. 📅 Update "Last Updated" date above
-5. 📝 Document learnings in Notes section
-6. ➡️ Only then proceed to next phase
+**⚠️ 중요 지침**: 각 페이즈가 완료된 후에는:
+1. ✅ 완료된 작업의 체크박스를 체크하세요.
+2. 🧪 모든 품질 게이트 검증 명령어를 실행하세요.
+3. ⚠️ 모든 품질 게이트 항목이 통과했는지 확인하세요.
+4. 📅 위 "Last Updated" 날짜를 업데이트하세요.
+5. 📝 Notes 섹션에 배운 점을 기록하세요.
+6. ➡️ 그 후에만 다음 페이즈로 진행하세요.
 
-⛔ **DO NOT skip quality gates or proceed with failing checks**
+⛔ **품질 게이트를 건너뛰거나 체크가 실패한 상태로 진행하지 마세요.**
 
 ---
 
-## 📋 Overview
+## 📋 개요 (Overview)
 
-### Feature Description
-Core Domain에서 정의한 Repository Interface(`User`, `Token`, `Event`)를 구현하는 인프라스트럭처 계층을 구축합니다.
+### 기능 설명
+Core Domain에서 정의한 리포지토리 인터페이스(`User`, `Token`, `Event`)를 구현하는 인프라스트럭처 계층을 구축합니다.
 **DO_003** 결정에 따라 **PostgreSQL**을 데이터베이스로 사용하며, **SQLAlchemy (Async)**와 **Alembic**으로 관리합니다.
 
-### Success Criteria
+### 성공 기준 (Success Criteria)
 - [ ] `docker-compose` 환경에 PostgreSQL 컨테이너 추가 및 구동 확인
 - [ ] SQLAlchemy 비동기 엔진 연결 (`postgresql+asyncpg`) 및 세션 설정 완료
 - [ ] Alembic을 통한 초기 스키마(User, Token, Event) 마이그레이션 적용
-- [ ] Repository Adapter 구현체 작성 및 통합 테스트(Integration Test) 100% 통과
+- [ ] 리포지토리 어댑터 구현체 작성 및 통합 테스트(Integration Test) 100% 통과
 
-### User Impact
+### 사용자 영향 (User Impact)
 - 데이터 영속성 확보로 인해 서버 재시작 시에도 사용자 정보와 일정 데이터가 유지됩니다.
 - 동시성 처리가 강화되어 다중 사용자 요청을 안정적으로 처리할 수 있습니다.
 
 ---
 
-## 🏗️ Architecture Decisions
+## 🏗️ 아키텍처 결정 (Architecture Decisions)
 
-| Decision | Rationale | Trade-offs |
+| 결정 사항 | 근거 | 트레이드오프 |
 |----------|-----------|------------|
 | **PostgreSQL 15+** | DO_003에 따른 결정. 데이터 안정성 및 확장성 확보 | 초기 리소스 사용량 증가 (Docker로 해결) |
 | **asyncpg** | 성능이 가장 우수한 Python 비동기 드라이버 | 빌드 의존성 존재 (Docker 환경에서 제어 가능) |
@@ -48,14 +48,14 @@ Core Domain에서 정의한 Repository Interface(`User`, `Token`, `Event`)를 �
 
 ---
 
-## 📦 Dependencies
+## 📦 의존성 (Dependencies)
 
-### Required Before Starting
-- [x] PLAN_001 (Docker Environment)
-- [x] PLAN_002 (Core Domain Entities & Ports)
-- [x] DO_003 (Persistence Strategy Decision)
+### 시작 전 필요 사항
+- [x] PLAN_001 (Docker 환경)
+- [x] PLAN_002 (Core Domain 엔티티 및 포트)
+- [x] DO_003 (영속성 전략 결정)
 
-### External Dependencies
+### 외부 의존성
 - sqlalchemy: ^2.0
 - asyncpg: ^0.29
 - alembic: ^1.13
@@ -63,19 +63,19 @@ Core Domain에서 정의한 Repository Interface(`User`, `Token`, `Event`)를 �
 
 ---
 
-## 🧪 Test Strategy
+## 🧪 테스트 전략 (Test Strategy)
 
-### Testing Approach
-**TDD Principle**: Write tests FIRST, then implement to make them pass
+### 테스트 접근 방식
+**TDD 원칙**: 테스트를 **먼저** 작성하고, 이를 통과시키기 위한 구현을 진행합니다.
 
-### Test Pyramid for This Feature
-| Test Type | Coverage Target | Purpose |
+### 테스트 피라미드
+| 테스트 유형 | 커버리지 목표 | 목적 |
 |-----------|-----------------|---------|
-| **Unit Tests** | N/A | (Core 로직은 PLAN_002에서 완료됨) |
-| **Integration Tests** | 100% (Connections) | DB 연결, 스키마 생성, CRUD 동작 검증 |
-| **E2E Tests** | N/A | 이번 단계에서는 제외 |
+| **단위 테스트** | 해당 없음 | (Core 로직은 PLAN_002에서 완료됨) |
+| **통합 테스트** | 100% (연결) | DB 연결, 스키마 생성, CRUD 동작 검증 |
+| **E2E 테스트** | 해당 없음 | 이번 단계에서는 제외 |
 
-### Test File Organization
+### 테스트 파일 구조
 ```
 tests/
 ├── integration/
@@ -83,197 +83,197 @@ tests/
 │   └── test_repositories.py   (Phase 3)
 ```
 
-### Coverage Requirements by Phase
-- **Phase 1 (DB Setup)**: DB 연결 성공 여부 100% 검증
-- **Phase 2 (Schema)**: Alembic 마이그레이션 성공 여부 검증
-- **Phase 3 (Repositories)**: Adapter CRUD 로직 100% 커버리지
+### 페이즈별 커버리지 요구사항
+- **Phase 1 (DB 설정)**: DB 연결 성공 여부 100% 검증
+- **Phase 2 (스키마)**: Alembic 마이그레이션 성공 여부 검증
+- **Phase 3 (리포지토리)**: 어댑터 CRUD 로직 100% 커버리지
 
 ---
 
-## 🚀 Implementation Phases
+## 🚀 구현 페이즈 (Implementation Phases)
 
-### Phase 1: DB Infrastructure Setup
-**Goal**: PostgreSQL 컨테이너 실행 및 애플리케이션 연결
-**Estimated Time**: 2 hours
-**Status**: ⏳ Pending
+### Phase 1: DB 인프라 설정
+**목표**: PostgreSQL 컨테이너 실행 및 애플리케이션 연결
+**예상 시간**: 2시간
+**상태**: ⏳ Pending
 
-#### Tasks
+#### 작업 (Tasks)
 
-**🔴 RED: Write Failing Tests First**
-- [ ] **Test 1.1**: Write connection test
-  - File(s): `tests/integration/test_db_connection.py`
-  - Expected: Fails because DB config and driver dependecies are missing
-  - Details: `SELECT 1` query execution test using `get_db` dependency
+**🔴 RED: 실패하는 테스트 먼저 작성**
+- [ ] **Test 1.1**: 연결 테스트 작성
+  - 파일: `tests/integration/test_db_connection.py`
+  - 예상 결과: DB 설정 및 드라이버 의존성이 없으므로 실패
+  - 상세: `get_db` 의존성을 사용하여 `SELECT 1` 쿼리 실행 테스트
 
-**🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 1.2**: Update Docker Compose
-  - File(s): `docker-compose.local.yml`, `docker-compose.yml`
-  - Goal: Add `postgres` service with volume persistence
-- [ ] **Task 1.3**: Add Dependencies and Config
-  - File(s): `pyproject.toml`, `.env.local`, `src/infrastructure/db.py`
-  - Goal: Install `asyncpg/sqlalchemy`, implement `AsyncEngine` and session factory
+**🟢 GREEN: 테스트 통과를 위한 구현**
+- [ ] **Task 1.2**: Docker Compose 업데이트
+  - 파일: `docker-compose.local.yml`, `docker-compose.yml`
+  - 목표: `postgres` 서비스 추가 및 볼륨 영속화 설정
+- [ ] **Task 1.3**: 의존성 추가 및 설정
+  - 파일: `pyproject.toml`, `.env.local`, `src/infrastructure/db.py`
+  - 목표: `asyncpg/sqlalchemy` 설치, `AsyncEngine` 및 세션 팩토리 구현
 
-**🔵 REFACTOR: Clean Up Code**
-- [ ] **Task 1.4**: Optimize Config
-  - File(s): `src/infrastructure/db.py`
-  - Goal: Ensure proper connection pooling settings
+**🔵 REFACTOR: 코드 개선**
+- [ ] **Task 1.4**: 설정 최적화
+  - 파일: `src/infrastructure/db.py`
+  - 목표: 적절한 커넥션 풀 설정 확인
 
-#### Quality Gate ✋
+#### 품질 게이트 (Quality Gate) ✋
 
-**⚠️ STOP: Do NOT proceed to Phase 2 until ALL checks pass**
+**⚠️ 중단: 모든 항목이 통과하기 전까지 Phase 2로 넘어가지 마세요**
 
-- [ ] **TDD Compliance**: Red-Green-Refactor cycle followed
-- [ ] **Build**: `docker compose up -d` starts successfully
-- [ ] **All Tests Pass**: `pytest tests/integration/test_db_connection.py` PASSED
-- [ ] **Linting**: `ruff check .` PASSED
-
----
-
-### Phase 2: Schema & Migration
-**Goal**: 테이블 스키마 정의 및 적용 (Alembic)
-**Estimated Time**: 2 hours
-**Status**: ⏳ Pending
-
-#### Tasks
-
-**🔴 RED: Write Failing Tests First**
-- [ ] **Test 2.1**: Verify Table Existence (Manual/Script)
-  - Details: Connect to DB and check for `users` table -> Should not exist
-
-**🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 2.2**: Define ORM Models
-  - File(s): `src/infrastructure/schema.py`
-  - Goal: Map `User`, `Token`, `Event` entities to SQLAlchemy Base
-- [ ] **Task 2.3**: Configure Alembic
-  - File(s): `alembic.ini`, `migrations/env.py`
-  - Goal: Support async migration
-- [ ] **Task 2.4**: Run Migration
-  - Command: `alembic revision --autogenerate`, `alembic upgrade head`
-
-**🔵 REFACTOR: Clean Up Code**
-- [ ] **Task 2.5**: Review Migration Script
-  - File(s): `migrations/versions/*.py`
-  - Goal: Ensure generated SQL is correct and readable
-
-#### Quality Gate ✋
-
-- [ ] **TDD Compliance**: Verified schemas before and after
-- [ ] **Functionality**: `alembic upgrade head` runs without error
-- [ ] **Verification**: Tables `users`, `tokens`, `events` exist in Postgres
+- [ ] **TDD 준수**: Red-Green-Refactor 사이클 준수함
+- [ ] **빌드**: `docker compose up -d` 성공적으로 실행됨
+- [ ] **모든 테스트 통과**: `pytest tests/integration/test_db_connection.py` 통과
+- [ ] **린트**: `ruff check .` 통과
 
 ---
 
-### Phase 3: Repository Implementation
-**Goal**: 도메인 포트 구현 (Adapter)
-**Estimated Time**: 4 hours
-**Status**: ⏳ Pending
+### Phase 2: 스키마 및 마이그레이션
+**목표**: 테이블 스키마 정의 및 적용 (Alembic)
+**예상 시간**: 2시간
+**상태**: ⏳ Pending
 
-#### Tasks
+#### 작업 (Tasks)
 
-**🔴 RED: Write Failing Tests First**
-- [ ] **Test 3.1**: Integration Tests for Repositories
-  - File(s): `tests/integration/test_repositories.py`
-  - Details: Test cases for `save`, `get_by_id`, `is_expired` logic with real DB
-  - Expected: Fails (ImportError or NotImplementedError)
+**🔴 RED: 실패하는 테스트 먼저 작성**
+- [ ] **Test 2.1**: 테이블 존재 여부 확인 (수동/스크립트)
+  - 상세: DB 접속 후 `users` 테이블 확인 -> 없어야 함
 
-**🟢 GREEN: Implement to Make Tests Pass**
-- [ ] **Task 3.2**: Implement UserRepository
-  - File(s): `src/infrastructure/persistence/user_repo.py`
-- [ ] **Task 3.3**: Implement TokenRepository
-  - File(s): `src/infrastructure/persistence/token_repo.py`
-- [ ] **Task 3.4**: Implement EventRepository
-  - File(s): `src/infrastructure/persistence/event_repo.py`
+**🟢 GREEN: 테스트 통과를 위한 구현**
+- [ ] **Task 2.2**: ORM 모델 정의
+  - 파일: `src/infrastructure/schema.py`
+  - 목표: `User`, `Token`, `Event` 엔티티를 SQLAlchemy Base 모델로 매핑
+- [ ] **Task 2.3**: Alembic 설정
+  - 파일: `alembic.ini`, `migrations/env.py`
+  - 목표: 비동기 마이그레이션 지원 설정
+- [ ] **Task 2.4**: 마이그레이션 실행
+  - 명령어: `alembic revision --autogenerate`, `alembic upgrade head`
 
-**🔵 REFACTOR: Clean Up Code**
-- [ ] **Task 3.5**: Common Repository Pattern
-  - Goal: Extract common CRUD logic if possible (Mixin)
+**🔵 REFACTOR: 코드 개선**
+- [ ] **Task 2.5**: 마이그레이션 스크립트 검토
+  - 파일: `migrations/versions/*.py`
+  - 목표: 생성된 SQL이 정확하고 가독성 있는지 확인
 
-#### Quality Gate ✋
+#### 품질 게이트 (Quality Gate) ✋
 
-- [ ] **TDD Compliance**: Tests written first
-- [ ] **All Tests Pass**: `pytest tests/integration/test_repositories.py` PASSED (100%)
-- [ ] **Linting**: No ruff errors
+- [ ] **TDD 준수**: 전후 스키마 상태 검증함
+- [ ] **기능성**: `alembic upgrade head` 에러 없이 실행됨
+- [ ] **검증**: Postgres에 `users`, `tokens`, `events` 테이블 생성됨
 
 ---
 
-## ⚠️ Risk Assessment
+### Phase 3: 리포지토리 구현
+**목표**: 도메인 포트 구현 (Adapter)
+**예상 시간**: 4시간
+**상태**: ⏳ Pending
 
-| Risk | Probability | Impact | Mitigation Strategy |
+#### 작업 (Tasks)
+
+**🔴 RED: 실패하는 테스트 먼저 작성**
+- [ ] **Test 3.1**: 리포지토리 통합 테스트 작성
+  - 파일: `tests/integration/test_repositories.py`
+  - 상세: 실제 DB를 사용하여 `save`, `get_by_id`, `is_expired` 로직 검증
+  - 예상 결과: 구현체가 없으므로 실패 (ImportError 등)
+
+**🟢 GREEN: 테스트 통과를 위한 구현**
+- [ ] **Task 3.2**: UserRepository 구현
+  - 파일: `src/infrastructure/persistence/user_repo.py`
+- [ ] **Task 3.3**: TokenRepository 구현
+  - 파일: `src/infrastructure/persistence/token_repo.py`
+- [ ] **Task 3.4**: EventRepository 구현
+  - 파일: `src/infrastructure/persistence/event_repo.py`
+
+**🔵 REFACTOR: 코드 개선**
+- [ ] **Task 3.5**: 공통 리포지토리 패턴
+  - 목표: 가능하다면 공통 CRUD 로직 추출 (Mixin 활용)
+
+#### 품질 게이트 (Quality Gate) ✋
+
+- [ ] **TDD 준수**: 테스트 먼저 작성함
+- [ ] **모든 테스트 통과**: `pytest tests/integration/test_repositories.py` 100% 통과
+- [ ] **린트**: ruff 에러 없음
+
+---
+
+## ⚠️ 위험 평가 (Risk Assessment)
+
+| 위험 | 발생확률 | 영향도 | 완화 전략 |
 |------|-------------|--------|---------------------|
-| **DB Container Connect Fail** | Medium | High | `docker-compose` 설정 검증 및 `depends_on` 헬스체크 추가 |
-| **Async Driver Compatibility** | Low | Medium | `asyncpg` 버전 명시 및 최소한의 DB 기능만 초기 사용 |
-| **Test Data Pollution** | High | Medium | 통합 테스트 시 `pytest-asyncio` fixture로 트랜잭션 롤백 보장 |
+| **DB 컨테이너 연결 실패** | 중간 | 높음 | `docker-compose` 설정 검증 및 `depends_on` 헬스체크 추가 |
+| **비동기 드라이버 호환성** | 낮음 | 중간 | `asyncpg` 버전 명시 및 최소한의 DB 기능만 초기 사용 |
+| **테스트 데이터 오염** | 높음 | 중간 | 통합 테스트 시 `pytest-asyncio` 픽스처로 트랜잭션 롤백 보장 |
 
 ---
 
-## 🔄 Rollback Strategy
+## 🔄 롤백 전략 (Rollback Strategy)
 
-### If Phase 1 Fails
-**Steps to revert**:
-- Undo code changes in: `src/infrastructure/db.py`, `docker-compose*.yml`
-- Remove dependencies: `poetry remove asyncpg sqlalchemy`
-- Stop container: `docker compose down`
+### Phase 1 실패 시
+**복구 절차**:
+- 코드 변경 취소: `src/infrastructure/db.py`, `docker-compose*.yml`
+- 의존성 제거: `poetry remove asyncpg sqlalchemy`
+- 컨테이너 중지: `docker compose down`
 
-### If Phase 2 Fails
-**Steps to revert**:
-- Database rollback: `alembic downgrade base`
-- Undo code changes in: `src/infrastructure/schema.py`, `migrations/`
+### Phase 2 실패 시
+**복구 절차**:
+- 데이터베이스 롤백: `alembic downgrade base`
+- 코드 변경 취소: `src/infrastructure/schema.py`, `migrations/`
 
-### If Phase 3 Fails
-**Steps to revert**:
-- Remove files: `src/infrastructure/persistence/*.py`
-- Discard git changes
+### Phase 3 실패 시
+**복구 절차**:
+- 파일 삭제: `src/infrastructure/persistence/*.py`
+- Git 변경사항 폐기
 
 ---
 
-## 📊 Progress Tracking
+## 📊 진행 상황 추적 (Progress Tracking)
 
-### Completion Status
+### 완료 상태
 - **Phase 1**: ⏳ 0% | 🔄 50% | ✅ 100%
 - **Phase 2**: ⏳ 0% | 🔄 50% | ✅ 100%
 - **Phase 3**: ⏳ 0% | 🔄 50% | ✅ 100%
 
-**Overall Progress**: 0% complete
+**전체 진행률**: 0% 완료
 
-### Time Tracking
-| Phase | Estimated | Actual | Variance |
+### 시간 추적
+| 페이즈 | 예상 시간 | 실제 시간 | 차이 |
 |-------|-----------|--------|----------|
-| Phase 1 | 2 hours | - | - |
-| Phase 2 | 2 hours | - | - |
-| Phase 3 | 4 hours | - | - |
-| **Total** | 8 hours | - | - |
+| Phase 1 | 2시간 | - | - |
+| Phase 2 | 2시간 | - | - |
+| Phase 3 | 4시간 | - | - |
+| **합계** | 8시간 | - | - |
 
 ---
 
-## 📝 Notes & Learnings
+## 📝 노트 및 배운 점 (Notes & Learnings)
 
-### Implementation Notes
-- (To be filled)
+### 구현 노트
+- (작성 예정)
 
-### Blockers Encountered
-- (To be filled)
+### 직면한 차단 요소 (Blockers)
+- (작성 예정)
 
-### Improvements for Future Plans
-- (To be filled)
+### 향후 개선 사항
+- (작성 예정)
 
 ---
 
-## 📚 References
+## 📚 참조문서 (References)
 
-### Documentation
+### 문서
 - [SQLAlchemy Asyncio Documentation](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)
 - [Alembic Async Tutorial](https://alembic.sqlalchemy.org/en/latest/cookbook.html#using-asyncio-with-alembic)
 
-### Related Issues
+### 관련 이슈
 - DO_003: Persistence Strategy
 
 ---
 
-## ✅ Final Checklist
+## ✅ 최종 체크리스트 (Final Checklist)
 
-**Before marking plan as COMPLETE**:
-- [ ] All phases completed with quality gates passed
-- [ ] Full integration testing performed
-- [ ] Documentation updated
-- [ ] Security review completed (DB Credentials safety)
-- [ ] Plan document archived for future reference
+**계획을 COMPLETE로 표시하기 전에**:
+- [ ] 모든 페이즈가 완료되고 품질 게이트를 통과했음
+- [ ] 전체 통합 테스트 수행됨
+- [ ] 문서 업데이트됨
+- [ ] 보안 검토 완료됨 (DB 자격증명 안전)
+- [ ] 계획서 문서가 보관됨
