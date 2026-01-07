@@ -80,16 +80,17 @@ Panager 프로젝트의 **기반(Foundation)**을 구축합니다.
 ---
 
 ### Phase 3: Docker Environment
-**Goal**: 로컬 개발을 위한 컨테이너 환경 구축
+**Goal**: 로컬 및 배포 환경을 위한 컨테이너 설정 분리
 **Status**: ✅ Complete
 
 #### Tasks
 - [x] **Dockerfile**: Multi-stage build로 경량 이미지 생성
-- [x] **Docker Compose**: `docker-compose.yml` 작성 (App + 추후 DB용)
+- [x] **Docker Compose (Prod)**: `docker-compose.yml` 작성 (배포용, 소스 마운트 X, .env 사용)
+- [x] **Docker Compose (Local)**: `docker-compose.local.yml` 작성 (개발용, 소스 마운트 O, .env.local 사용)
 - [x] **Health Check**: FastAPI `GET /health` 엔드포인트 구현
 
 #### Quality Gate
-- [x] `docker compose up -d` 로 서버 실행 성공
+- [x] `docker compose -f docker-compose.local.yml up -d` 로 로컬 서버 실행 성공
 - [x] `curl localhost:8080/health` 응답 확인 (`{"status": "ok"}`)
 
 ---
