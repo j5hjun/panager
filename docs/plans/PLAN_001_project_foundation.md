@@ -29,7 +29,7 @@ Panager 프로젝트의 **기반(Foundation)**을 구축합니다.
 ### Success Criteria
 - [x] Poetry를 통한 Python 프로젝트 및 가상환경 구성 완료
 - [x] Clean Architecture 기반의 폴더 구조 생성 (`domain`, `application`, `infrastructure`, `interfaces`)
-- [x] Docker 개발 환경 (`docker-compose.yml`) 실행 성공
+- [x] Docker 개발 환경 (`docker-compose.local.yml`) 실행 성공
 - [x] 기본적인 Linting (`ruff`) 및 Testing (`pytest`) 설정 완료
 
 ---
