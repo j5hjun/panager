@@ -73,3 +73,12 @@
 
 #### NFR-003: Expandability (확장성)
 - 향후 Google Calendar 외 다른 캘린더나 메신저(디스코드 등)로 확장 가능하도록 인터페이스가 추상화되어야 한다.
+
+#### NFR-004: Deployment Automation (배포 자동화)
+- **NFR-004-1**: `main` 브랜치는 보호되며, CI(`test`)를 통과해야만 머지할 수 있다.
+- **NFR-004-2**: CI 성공 시 Docker 이미지를 빌드하여 GHCR(GitHub Container Registry)에 푸시해야 한다.
+- **NFR-004-3**: 운영 서버 배포는 무중단(Zero-downtime)으로 이루어져야 하며, 실패 시 자동으로 이전 버전으로 롤백되어야 한다.
+
+#### NFR-005: Configuration Management (설정 관리)
+- **NFR-005-1**: 로컬 개발 환경용 설정 파일은 `.local` 접미사를 사용한다. (예: `docker-compose.local.yml`, `.env.local`)
+- **NFR-005-2**: 운영 환경 설정은 배포 파이프라인 비밀 변수(Secrets) 등을 통해 주입하며, 소스 코드에 포함하지 않는다.
