@@ -1,66 +1,142 @@
-# Design Options: Persistence Strategy
+# Design Options: 인프라 영속성 전략 (Persistence Strategy)
 
-**Date**: 2026-01-07
-**Author**: Antigravity
-**Status**: Draft
-
----
-
-## 1. Context and Problem Statement
-Panager는 사용자 정보, 인증 토큰, 캘린더 이벤트를 저장해야 합니다.
-현재 프로젝트는 초기 단계이며, 로컬 개발 및 소규모 배포(사용자 1~10명 내외)를 목표로 합니다.
-적절한 데이터베이스 엔진과 ORM(Object-Relational Mapping) 전략을 결정해야 합니다.
-
-## 2. Requirements (Constraints)
-- **비동기(Async) 지원**: FastAPI와 호환되는 Non-blocking I/O 필수
-- **설정 간소화**: 배포 및 유지보수가 쉬워야 함 (NFR-005)
-- **데이터 무결성**: 관계형 데이터(User-Token) 표현 가능해야 함
-- **마이그레이션**: 스키마 변경 이력 관리가 되어야 함
+## 📋 개요
+**기능**: Core Domain 데이터를 저장하고 관리하기 위한 데이터베이스 엔진 및 ORM 전략 선정
+**작성일**: 2026-01-07
+**상태**: ✅ 결정 완료 (PostgreSQL)
 
 ---
 
-## 3. Options Analysis
+## 🎯 요구사항
 
-### Option A: SQLite (With Wal Mode)
-파일 기반의 임베디드 데이터베이스입니다.
-- **Stack**: SQLite + `aiosqlite` + SQLAlchemy
-- **Pros**:
-    - 별도의 서버 프로세스가 필요 없음 (설정 제로)
-    - 백업이 단순함 (파일 복사)
-    - Python 내장 라이브러리로 접근성 높음
-- **Cons**:
-    - 동시 쓰기(Write) 성능 제약 (WAL 모드로 완화 가능하지만 한계 있음)
-    - 일부 고급 SQL 기능 미지원 (PostgreSQL 대비)
+### 필수 요구사항
+- [x] Python `asyncio` 지원 (비동기 I/O)
+- [x] 관계형 데이터 표현 가능 (User-Token, User-Event)
+- [x] 데이터 무결성 보장
 
-### Option B: PostgreSQL (Dockerized)
-강력한 엔터프라이즈급 오픈소스 RDBMS입니다.
-- **Stack**: PostgreSQL Container + `asyncpg` + SQLAlchemy
-- **Pros**:
-    - 강력한 동시성 제어 및 트랜잭션 관리
-    - 풍부한 데이터 타입 (JSONB 등) 및 확장성
-- **Cons**:
-    - 리소스(RAM/CPU) 소모가 더 큼
-    - 운영 복잡도 증가 (별도 컨테이너 관리, 백업 정책 수립 필요)
-
-### Option C: NoSQL / Document Store (e.g., TinyDB, MongoDB)
-JSON 문서 형태의 저장소입니다.
-- **Stack**: TinyDB or MongoDB
-- **Pros**:
-    - 스키마가 유연함 (Schema-less)
-    - 초기 개발 속도가 빠를 수 있음
-- **Cons**:
-    - 관계(Relation) 표현이 어려움 (User-Token Join 등)
-    - TinyDB는 성능 이슈, MongoDB는 운영 복잡도 있음
-    - ACID 트랜잭션 보장이 약하거나 복잡함
+### 선택 요구사항
+- [x] Docker 컨테이너 실행 용이성
+- [ ] 배포 및 백업의 간편함
+- [ ] JSON 데이터 타입 지원 (확장성)
 
 ---
 
-## 5. Decision
-**Selection**: Option B (PostgreSQL)
+## 🔀 구현 방안 비교
 
-**Justification**:
-서비스의 장기적인 성장과 데이터 안정성을 고려하여 엔터프라이즈급 RDBMS인 PostgreSQL을 선택합니다.
-초기 리소스 비용이 들더라도, 동시성 처리와 미래의 확장을 위해 처음부터 견고한 기반을 다지는 것이 중요합니다.
-- [ ] Option A: SQLite
-- [x] Option B: PostgreSQL
-- [ ] Option C: NoSQL
+### 방안 A: SQLite (With Wal Mode)
+
+**설명**: 서버리스 파일 기반의 임베디드 RDBMS
+
+| 항목 | 내용 |
+|------|------|
+| **구현 난이도** | 🟢 낮음 |
+| **예상 시간** | 1시간 |
+| **유지보수** | 🟢 쉬움 (파일 복사만 하면 됨) |
+| **확장성** | 🔴 나쁨 (동시성 제한) |
+
+**장점**:
+- 별도의 서버 프로세스 설정 불필요
+- Python 표준 라이브러리에 가까움
+- 로컬 개발 환경 구성이 매우 빠름
+
+**단점**:
+- 동시 쓰기(Write) 작업 시 락(Lock) 걸릴 수 있음
+- 엔터프라이즈급 기능(고급 쿼리, JSONB 등) 제한적
+
+**필요한 것**:
+- `aiosqlite`, `sqlalchemy`
+
+---
+
+### 방안 B: PostgreSQL (Dockerized)
+
+**설명**: 강력한 오픈소스 엔터프라이즈 RDBMS
+
+| 항목 | 내용 |
+|------|------|
+| **구현 난이도** | 🟡 중간 (Docker 설정 필요) |
+| **예상 시간** | 2시간 |
+| **유지보수** | 🟡 보통 (백업 정책 필요) |
+| **확장성** | 🟢 좋음 (JSONB, 강력한 동시성) |
+
+**장점**:
+- 뛰어난 동시성 제어 (MVCC)
+- 풍부한 데이터 타입 및 인덱싱
+- 실제 운영 환경(Production)의 표준
+
+**단점**:
+- Docker 컨테이너 실행으로 인한 리소스 소모
+- 초기 설정(connection pool 등)이 다소 복잡
+
+**필요한 것**:
+- Docker, `asyncpg`, `sqlalchemy`
+
+---
+
+### 방안 C: TinyDB (JSON File)
+
+**설명**: 순수 Python으로 작성된 문서 지향 데이터베이스
+
+| 항목 | 내용 |
+|------|------|
+| **구현 난이도** | 🟢 낮음 |
+| **예상 시간** | 0.5시간 |
+| **유지보수** | 🟢 쉬움 |
+| **확장성** | 🔴 매우 나쁨 |
+
+**장점**:
+- 매우 가볍고 직관적
+- 스키마리스(Schema-less) 유연함
+
+**단점**:
+- ACID 트랜잭션 미지원
+- 쿼리 성능 저하 (데이터 커지면 느림)
+- 관계형 데이터 조인(Join) 불가
+
+**필요한 것**:
+- `tinydb`
+
+---
+
+## 📊 비교 요약
+
+| 기준 | 방안 A (SQLite) | 방안 B (PostgreSQL) | 방안 C (TinyDB) |
+|------|--------|--------|--------|
+| 구현 난이도 | 🟢 낮음 | 🟡 중간 | 🟢 낮음 |
+| 예상 시간 | 1시간 | 2시간 | 0.5시간 |
+| 데이터 무결성 | 🟡 보통 | 🟢 우수 | 🔴 부족 |
+| 확장성 | 🔴 낮음 | 🟢 높음 | 🔴 낮음 |
+| 운영 복잡도 | 🟢 낮음 | 🟡 중간 | 🟢 낮음 |
+
+---
+
+## 🎯 AI 추천
+
+**추천 방안**: **방안 A (SQLite)**
+
+**이유**:
+1. 현재 프로젝트 규모(개인 비서)에서는 SQLite로도 충분한 성능을 낼 수 있습니다.
+2. 초기 개발 속도를 높이고 배포 복잡도를 낮추는 것이 유리합니다.
+3. 추후 확장이 필요할 때 SQLAlchemy Adapter를 통해 PostgreSQL로 쉽게 전환할 수 있습니다.
+
+**주의사항**:
+- `async` 지원을 위해 `aiosqlite` 드라이버 사용 필수
+- 동시 접속자가 늘어날 경우 병목 발생 가능
+
+---
+
+## ✅ 결정
+
+> **선택한 방안**: [ ] 방안 A / [x] 방안 B / [ ] 방안 C
+> 
+> **결정 이유**: 서비스의 장기적인 성장과 데이터 안정성을 최우선으로 고려합니다. 초기 리소스 비용이 들더라도, 동시성 처리와 미래의 확장을 위해 처음부터 견고한 기반(PostgreSQL)을 다지는 것이 중요하다고 판단했습니다.
+> 
+> **결정일**: 2026-01-07
+
+---
+
+## 🔜 다음 단계
+
+결정 후:
+1. PLAN 문서 작성 (구현 계획) - 위 결정 내용을 Architecture Decisions 섹션에 반영 (완료)
+2. 구현 시작 (PLAN_003)
