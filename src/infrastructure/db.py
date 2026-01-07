@@ -1,3 +1,4 @@
+from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from typing import AsyncGenerator
 from src.config.settings import Settings
@@ -7,6 +8,7 @@ settings = Settings()
 engine = create_async_engine(
     settings.db_url,
     echo=settings.debug,
+    poolclass=pool.NullPool,
 )
 
 AsyncSessionLocal = async_sessionmaker(
