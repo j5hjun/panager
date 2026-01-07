@@ -37,38 +37,38 @@ Clean Architecture 원칙에 따라, 이 계층은 외부 라이브러리(Slack 
 
 ### Phase 1: User & Token Domain
 **Goal**: 사용자 및 인증 토큰 모델링
-**Status**: ⏳ Pending
+**Status**: ✅ Complete
 
 #### Tasks
-- [ ] **User Entity**: `src/domain/models/user.py` 생성 (slack_id, is_active 등)
-- [ ] **Token Entity**: `src/domain/models/token.py` 생성 (access_token, refresh_token, expires_at)
-- [ ] **Repository Ports**: `src/domain/ports/user_repo.py`, `token_repo.py` 인터페이스 정의
+- [x] **User Entity**: `src/domain/models/user.py` 생성 (slack_id, is_active 등)
+- [x] **Token Entity**: `src/domain/models/token.py` 생성 (access_token, refresh_token, expires_at)
+- [x] **Repository Ports**: `src/domain/ports/user_repo.py`, `token_repo.py` 인터페이스 정의
 
 #### Quality Gate
-- [ ] `User` 생성 시 필수 필드 검증 테스트 통과
-- [ ] `Token.is_expired()` 메서드 동작 테스트 통과
+- [x] `User` 생성 시 필수 필드 검증 테스트 통과
+- [x] `Token.is_expired()` 메서드 동작 테스트 통과
 
 ---
 
 ### Phase 2: Calendar Event Domain
 **Goal**: 캘린더 이벤트 모델링
-**Status**: ⏳ Pending
+**Status**: ✅ Complete
 
 #### Tasks
-- [ ] **Event Entity**: `src/domain/models/event.py` 생성 (summary, start_time, end_time, location)
-- [ ] **Event Logic**: 이벤트 기간 계산, 중복 확인 등 도메인 로직 추가
-- [ ] **Repository Port**: `src/domain/ports/event_repo.py` 인터페이스 정의
+- [x] **Event Entity**: `src/domain/models/event.py` 생성 (summary, start_time, end_time, location)
+- [x] **Event Logic**: 이벤트 기간 계산, 중복 확인 등 도메인 로직 추가
+- [x] **Repository Port**: `src/domain/ports/event_repo.py` 인터페이스 정의
 
 #### Quality Gate
-- [ ] `Event`의 시작 시간이 끝 시간보다 늦을 경우 에러 발생 확인 테스트
+- [x] `Event`의 시작 시간이 끝 시간보다 늦을 경우 에러 발생 확인 테스트
 
 ---
 
 ## 📊 Progress Tracking
 
 ```
-Phase 1: User/Token     ⬜⬜⬜⬜⬜ 0%
-Phase 2: Event          ⬜⬜⬜⬜⬜ 0%
+Phase 1: User/Token     ████████████ 100%
+Phase 2: Event          ████████████ 100%
 ```
 
 ---

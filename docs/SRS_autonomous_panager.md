@@ -81,4 +81,4 @@
 
 #### NFR-005: Configuration Management (설정 관리)
 - **NFR-005-1**: 로컬 개발 환경용 설정 파일은 `.local` 접미사를 사용한다. (예: `docker-compose.local.yml`, `.env.local`)
-- **NFR-005-2**: 운영 환경 설정은 배포 파이프라인 비밀 변수(Secrets) 등을 통해 주입하며, 소스 코드에 포함하지 않는다.
+- **NFR-005-2**: 운영 환경 설정은 배포 파이프라인의 `ENV_FILE` 시크릿(Secret)에 `.env` 전체 내용을 담아 주입하는 방식을 사용한다. 소스 코드에는 절대 포함하지 않는다.
