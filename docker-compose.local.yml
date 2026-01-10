@@ -1,12 +1,38 @@
 services:
-  panager:
+  app:
     build: .
+    container_name: panager
     ports:
-      - "8080:8080"
-    volumes:
-      - ./src:/app/src
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     env_file:
       - .env.local
-    environment:
-      - PYTHONUNBUFFERED=1
-    restart: unless-stopped
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: panager_db
+    restart: always
+    env_file:
+      - .env.local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: panager_ngrok
+    ports:
+      - "4040:4040"
+    command: http app:8000
+    env_file:
+      - .env.local
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
