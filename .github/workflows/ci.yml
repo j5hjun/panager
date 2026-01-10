@@ -44,6 +44,14 @@ jobs:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: proactive_manager_test
       TESTING: "true"
+      # Dummy values for CI/Test
+      SECRET_KEY: "dummy_secret_key"
+      GOOGLE_CLIENT_ID: "dummy_client_id"
+      GOOGLE_CLIENT_SECRET: "dummy_client_secret"
+      GOOGLE_REDIRECT_URI: "http://localhost:8000/auth/callback"
+      SLACK_APP_TOKEN: "xapp-dummy-token"
+      SLACK_BOT_TOKEN: "xoxb-dummy-token"
+      SLACK_SIGNING_SECRET: "dummy_signing_secret"
 
     steps:
       - name: Checkout code
