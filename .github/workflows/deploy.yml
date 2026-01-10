@@ -37,7 +37,6 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest
             type=sha,format=long
 
       - name: Build and push Docker image
@@ -59,7 +58,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        # We need docker-compose.yml from repo
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -71,14 +69,35 @@ jobs:
       - name: Create .env file
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
-          # Ensure secure permissions
           chmod 600 .env
 
-      - name: Pull latest images
+      - name: Pull new image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: docker compose pull
 
-      - name: Deploy (Restart containers)
-        run: docker compose up -d
+      - name: Deploy new version
+        id: deploy
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: docker compose up -d --force-recreate --wait
 
+      - name: Rollback on Failure
+        if: failure() && steps.deploy.outcome == 'failure'
+        env:
+          IMAGE_TAG: latest
+        run: |
+          echo "⚠️ Deployment failed! Rolling back to previous 'latest' version..."
+          docker compose pull
+          docker compose up -d --force-recreate --wait
+
+      - name: Update Latest Tag (Promote to Stable)
+        if: success()
+        run: |
+          echo "✅ Deployment successful! Promoting ${{ github.sha }} to 'latest'..."
+          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/${{ github.repository }}:latest
+          
       - name: Cleanup unused images
+        if: always()
         run: docker image prune -f
