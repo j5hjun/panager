@@ -9,6 +9,9 @@ on:
       - '**/*.md'
       - '.github/workflows/ci.yml'
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   build:
     name: Build & Push
@@ -16,6 +19,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      image_name: ${{ steps.lower.outputs.name }}
 
     steps:
       - name: Checkout code
@@ -27,25 +32,22 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=raw,value=${{ github.sha }}
+      - name: Lowercase image name
+        id: lower
+        run: echo "name=$(echo '${{ env.REGISTRY }}/${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ steps.lower.outputs.name }}:${{ github.sha }}
+            ${{ steps.lower.outputs.name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -54,6 +56,9 @@ jobs:
     needs: build
     runs-on: self-hosted
     environment: production
+    concurrency:
+      group: production
+      cancel-in-progress: false
 
     steps:
       - name: Checkout code
@@ -62,7 +67,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -71,33 +76,52 @@ jobs:
           echo "${{ secrets.ENV_FILE }}" > .env
           chmod 600 .env
 
+      - name: Backup current version
+        id: backup
+        run: |
+          CURRENT=$(docker inspect panager --format='{{.Config.Image}}' 2>/dev/null | cut -d: -f2 || echo "none")
+          echo "current_tag=$CURRENT" >> $GITHUB_OUTPUT
+          echo "📦 Current version: $CURRENT"
+
       - name: Pull new image
         env:
           IMAGE_TAG: ${{ github.sha }}
-        run: docker compose pull
+        run: |
+          echo "📥 Pulling image: ${{ needs.build.outputs.image_name }}:${{ github.sha }}"
+          docker compose pull
 
       - name: Deploy new version
         id: deploy
         env:
           IMAGE_TAG: ${{ github.sha }}
-        run: docker compose up -d --force-recreate --wait
-
-      - name: Rollback on Failure
-        if: failure() && steps.deploy.outcome == 'failure'
-        env:
-          IMAGE_TAG: latest
         run: |
-          echo "⚠️ Deployment failed! Rolling back to previous 'latest' version..."
-          docker compose pull
-          docker compose up -d --force-recreate --wait
+          echo "🚀 Deploying version: ${{ github.sha }}"
+          docker compose up -d --force-recreate --wait --wait-timeout 120
+          echo "✅ Deployment successful!"
 
-      - name: Update Latest Tag (Promote to Stable)
+      - name: Verify health
         if: success()
         run: |
-          echo "✅ Deployment successful! Promoting ${{ github.sha }} to 'latest'..."
-          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
-          docker push ghcr.io/${{ github.repository }}:latest
-          
+          echo "🏥 Verifying health..."
+          sleep 5
+          curl -sf http://localhost:8000/health || (echo "❌ Health check failed" && exit 1)
+          echo "✅ Health check passed!"
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed. Container logs:"
+          docker compose logs --tail=100
+
+      - name: Rollback on failure
+        if: failure() && steps.backup.outputs.current_tag != 'none'
+        env:
+          IMAGE_TAG: ${{ steps.backup.outputs.current_tag }}
+        run: |
+          echo "⚠️ Rolling back to: ${{ steps.backup.outputs.current_tag }}"
+          docker compose pull || true
+          docker compose up -d --force-recreate
+
       - name: Cleanup unused images
         if: always()
         run: docker image prune -f

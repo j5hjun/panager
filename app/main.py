@@ -39,3 +39,12 @@ app.include_router(webhooks.router, prefix="/api/v1/webhook", tags=["webhooks"])
 @app.get("/")
 async def root():
     return {"status": "ok", "message": "Proactive Manager API is running"}
+
+
+@app.get("/health")
+async def health():
+    """
+    Health check endpoint for Docker/Kubernetes.
+    Used by container orchestration to verify app is running.
+    """
+    return {"status": "healthy", "version": settings.VERSION}
