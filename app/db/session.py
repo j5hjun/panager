@@ -6,7 +6,7 @@ from app.core.config import settings
 
 engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URI,
-    echo=True, # Log SQL queries for dev
+    echo=True,  # Log SQL queries for dev
     future=True,
 )
 
@@ -16,6 +16,7 @@ SessionLocal = async_sessionmaker(
     expire_on_commit=False,
     class_=AsyncSession,
 )
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """

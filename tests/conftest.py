@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 from httpx import AsyncClient, ASGITransport
 from app.main import app
 
+
 # Force session scope for event loop to handle global async engine
 @pytest.fixture(scope="session")
 def event_loop():
@@ -14,11 +15,15 @@ def event_loop():
     yield loop
     loop.close()
 
+
 @pytest.fixture(scope="session")
 def anyio_backend():
     return "asyncio"
 
+
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
         yield c

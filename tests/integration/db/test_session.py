@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import text
 from app.db.session import get_db
 
+
 @pytest.mark.asyncio
 async def test_database_connection():
     """
@@ -15,7 +16,7 @@ async def test_database_connection():
         async for session in get_db():
             result = await session.execute(text("SELECT 1"))
             assert result.scalar() == 1
-            break # We only need one session from the generator
+            break  # We only need one session from the generator
     except ImportError:
         pytest.fail("app.db.session or get_db not found")
     except Exception as e:

@@ -8,12 +8,12 @@ from app.services.user_service import AuthService, UserService
 from app.services.slack_service import SlackService
 from app.services.calendar_service import CalendarService
 from app.core.slack import slack_app
-from app.core.exceptions import AuthError
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.get("/google/login")
 async def login(slack_user_id: str = Query(..., alias="slack_user_id")):
@@ -22,36 +22,33 @@ async def login(slack_user_id: str = Query(..., alias="slack_user_id")):
     Uses slack_user_id as state.
     """
     if not slack_user_id:
-         raise HTTPException(status_code=400, detail="slack_user_id is required")
-         
+        raise HTTPException(status_code=400, detail="slack_user_id is required")
+
     auth_service = AuthService()
     url, state = auth_service.get_authorization_url(slack_user_id)
     return RedirectResponse(url)
 
+
 @router.get("/google/callback")
-async def callback(
-    code: str, 
-    state: str, 
-    db: AsyncSession = Depends(get_db)
-):
+async def callback(code: str, state: str, db: AsyncSession = Depends(get_db)):
     """
     Callback from Google. Exchange code for tokens and save to DB.
     state parameter contains slack_user_id.
     """
     if not code or not state:
         raise HTTPException(status_code=400, detail="Invalid request parameters")
-        
+
     slack_user_id = state
     auth_service = AuthService()
     user_service = UserService(db)
-    
+
     try:
         # 1. Exchange code for tokens
         token_data = auth_service.exchange_code(code)
-        
+
         # 2. Save to DB
         await user_service.save_credentials(slack_user_id, token_data)
-        
+
         # 3. Commit
         await db.commit()
 
@@ -60,12 +57,12 @@ async def callback(
             slack_service = SlackService(slack_app)
             await slack_service.send_dm(
                 user_id=slack_user_id,
-                text="✅ *구글 캘린더 연동 성공!*\n이제 캘린더 일정이 변경되면 알림을 보내드립니다."
+                text="✅ *구글 캘린더 연동 성공!*\n이제 캘린더 일정이 변경되면 알림을 보내드립니다.",
             )
         except Exception as e:
             logger.error(f"Failed to send Slack DM: {e}")
             # Don't fail the whole request just because slack msg failed for some reason
-        
+
         # 5. Trigger Calendar Watch
         try:
             calendar_service = CalendarService(db)
@@ -82,9 +79,12 @@ async def callback(
         template_path = Path("app/templates/success.html")
         if template_path.exists():
             return HTMLResponse(content=template_path.read_text(), status_code=200)
-        
-        return HTMLResponse(content="<h1>Authentication Successful</h1><p>You can close this window.</p>", status_code=200)
-        
+
+        return HTMLResponse(
+            content="<h1>Authentication Successful</h1><p>You can close this window.</p>",
+            status_code=200,
+        )
+
     except Exception as e:
         logger.error(f"Auth failed: {e}")
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")

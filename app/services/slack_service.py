@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SlackService:
     def __init__(self, app: App):
         self.app = app
@@ -13,10 +14,7 @@ class SlackService:
         Send a message to a specific channel.
         """
         try:
-            await self.app.client.chat_postMessage(
-                channel=channel_id,
-                text=text
-            )
+            await self.app.client.chat_postMessage(channel=channel_id, text=text)
         except SlackApiError as e:
             logger.error(f"Error sending message: {e}")
             raise e
