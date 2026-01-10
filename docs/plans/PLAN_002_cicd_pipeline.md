@@ -69,3 +69,139 @@ Github Repository Settings > Secrets and variables > Actions에 등록해야 할
 - `CODECOV_TOKEN`: Codecov 인증 토큰
 - `ENV_FILE`: 프로덕션용 `.env` 내용 (Deployment 시 생성)
 *참고: Self-hosted Runner 사용 시 SSH 관련 Secrets(`HOST`, `KEY` 등)는 필요하지 않음*
+
+---
+
+## 5. 베스트 프랙티스 (Best Practices)
+
+### 5.1 이미지 태깅 전략
+| 방식 | 설명 | 권장 여부 |
+|------|------|----------|
+| `latest` 단독 사용 | 롤백 불가, 추적 어려움 | ❌ 비권장 |
+| SHA 태그 | 불변, 추적 가능 | ✅ 권장 |
+| Semantic Version | 릴리스 관리 용이 | ✅ 권장 (정식 릴리스) |
+
+```yaml
+# 권장 예시
+tags: |
+  myapp:${{ github.sha }}    # 불변 태그
+  myapp:latest               # 편의용
+```
+
+### 5.2 Health Check 구성
+#### Dockerfile
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+```
+
+#### docker-compose.yml
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 30s
+```
+
+#### FastAPI Endpoint
+```python
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+```
+
+### 5.3 의존성 순서 (depends_on)
+```yaml
+services:
+  app:
+    depends_on:
+      db:
+        condition: service_healthy  # DB ready 후 앱 시작
+```
+
+### 5.4 무중단 배포 패턴
+
+| 패턴 | 복잡도 | 다운타임 | 적용 대상 |
+|------|--------|----------|----------|
+| **단순 교체** | 낮음 | 있음 (수초) | MVP, 소규모 |
+| **Rolling Update** | 중간 | 없음 | 중규모 |
+| **Blue-Green** | 높음 | 없음 | 대규모, 미션 크리티컬 |
+
+### 5.5 롤백 전략
+```yaml
+# 배포 전 현재 버전 저장
+- name: Backup current version
+  run: |
+    CURRENT=$(docker inspect panager --format='{{.Config.Image}}' | cut -d: -f2)
+    echo "current=$CURRENT" >> $GITHUB_OUTPUT
+
+# 실패 시 롤백
+- name: Rollback on failure
+  if: failure()
+  run: |
+    IMAGE_TAG=${{ steps.backup.outputs.current }}
+    docker compose up -d
+```
+
+### 5.6 로깅 관리
+```yaml
+logging:
+  driver: "json-file"
+  options:
+    max-size: "10m"   # 로그 파일 최대 크기
+    max-file: "3"     # 최대 파일 개수 (디스크 보호)
+```
+
+### 5.7 Multi-stage Dockerfile
+```dockerfile
+# Build stage - 빌드 도구 포함
+FROM python:3.11-slim AS builder
+RUN pip install poetry
+COPY pyproject.toml poetry.lock ./
+RUN poetry export -f requirements.txt | pip install -r /dev/stdin
+
+# Production stage - 런타임만 포함
+FROM python:3.11-slim
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY . .
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0"]
+```
+**장점**: 이미지 크기 감소, 보안 향상 (빌드 도구 제외)
+
+### 5.8 배포 동시성 제어
+```yaml
+deploy:
+  concurrency:
+    group: production
+    cancel-in-progress: false  # 진행 중인 배포 보호
+```
+
+---
+
+## 6. 개선 필요 사항 (Improvement Checklist)
+
+### 현재 상태 분석
+| 항목 | 현재 상태 | 목표 | 우선순위 |
+|------|----------|------|----------|
+| Immutable 태그 (SHA) | ✅ 적용됨 | 유지 | - |
+| Health Check (Dockerfile) | ✅ 적용됨 | 완료 | - |
+| Health Check (docker-compose) | ✅ 적용됨 | 완료 | - |
+| `/health` 엔드포인트 | ✅ 적용됨 | 완료 | - |
+| depends_on condition | ✅ 적용됨 | 완료 | - |
+| 로깅 제한 | ✅ 적용됨 | 완료 | - |
+| Multi-stage build | ✅ 적용됨 | 완료 | - |
+| 롤백 전략 | ✅ SHA 기반 | 완료 | - |
+| non-root 사용자 | ✅ 적용됨 | 완료 | - |
+| 배포 동시성 제어 | ✅ 적용됨 | 완료 | - |
+
+### 개선 작업 (Phase 4) - ✅ 완료
+- [x] **Task 4.1**: `/health` 엔드포인트 추가 (`app/main.py`)
+- [x] **Task 4.2**: Dockerfile에 HEALTHCHECK 추가
+- [x] **Task 4.3**: docker-compose.yml에 healthcheck 및 depends_on 조건 추가
+- [x] **Task 4.4**: 로깅 제한 설정 추가
+- [x] **Task 4.5**: 배포 워크플로에 SHA 기반 롤백 구현
+- [x] **Task 4.6**: Multi-stage Dockerfile로 전환
+- [x] **Task 4.7**: non-root 사용자로 컨테이너 실행 (보안 강화)
+- [x] **Task 4.8**: 배포 동시성 제어 (concurrency group)
