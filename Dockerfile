@@ -18,9 +18,10 @@ RUN pip install poetry poetry-plugin-export
 COPY pyproject.toml poetry.lock* ./
 
 # 가상환경 없이 시스템에 직접 설치
+# --no-root: 프로젝트 자체 설치 건너뜀 (app 폴더가 아직 없음)
 # --without dev: dev 의존성 제외
 RUN poetry config virtualenvs.create false \
-    && poetry install --without dev --no-interaction --no-ansi
+    && poetry install --no-root --without dev --no-interaction --no-ansi
 
 # ====================
 # 스테이지 2: 프로덕션
