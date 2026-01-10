@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/j5hjun/panager:latest
+    image: ghcr.io/j5hjun/panager:${IMAGE_TAG:-latest}
     container_name: panager
     restart: unless-stopped
     ports:
