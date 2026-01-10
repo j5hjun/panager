@@ -11,17 +11,17 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Poetry 설치
-RUN pip install poetry
+# Poetry 설치 (export 플러그인 포함)
+RUN pip install poetry poetry-plugin-export
 
 # 의존성 정의 파일 복사
 COPY pyproject.toml poetry.lock* ./
 
-# requirements.txt로 내보내고 패키지 설치
-# 프로덕션 이미지에서 poetry가 필요 없도록 함
+# 가상환경 없이 시스템에 직접 설치
+# --no-root: 프로젝트 자체 설치 건너뜀 (app 폴더가 아직 없음)
+# --without dev: dev 의존성 제외
 RUN poetry config virtualenvs.create false \
-    && poetry export -f requirements.txt --output requirements.txt --without-hashes \
-    && pip install --prefix=/install -r requirements.txt
+    && poetry install --no-root --without dev --no-interaction --no-ansi
 
 # ====================
 # 스테이지 2: 프로덕션
@@ -36,8 +36,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 빌더에서 설치된 패키지 복사
-COPY --from=builder /install /usr/local
+# 빌더에서 설치된 Python 패키지 복사
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # 애플리케이션 코드 복사
 COPY . .
