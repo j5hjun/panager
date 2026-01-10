@@ -85,3 +85,29 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           fail_ci_if_error: true
+
+  docker-build:
+    name: Docker Build 검증
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker 빌드 테스트
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: panager:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 이미지 크기 확인
+        run: |
+          docker images panager:test
+          echo "✅ Docker 빌드 성공!"
