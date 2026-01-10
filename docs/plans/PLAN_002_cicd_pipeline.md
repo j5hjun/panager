@@ -1,9 +1,9 @@
 # 구현 계획: CI/CD 파이프라인 구축
 
-**상태**: ⏳ 대기 중 (Pending)
+**상태**: ✅ 완료 (Completed)
 **Plan ID**: PLAN-002
 **시작일**: 2026-01-10
-**예상 완료일**: 2026-01-10
+**완료일**: 2026-01-10
 
 ---
 
@@ -23,33 +23,33 @@
 ### Phase 1: CI & Coverage (지속적 통합)
 **목표**: 코드 변경 시마다 테스트를 수행하고 커버리지를 리포트한다.
 
-- [ ] **Task 1.1**: Poetry 기반 CI 환경 구성 (`.github/workflows/ci.yml`)
+- [x] **Task 1.1**: Poetry 기반 CI 환경 구성 (`.github/workflows/ci.yml`)
     - Python 3.11 셋업
     - 의존성 캐싱 및 설치 (`poetry install`)
-- [ ] **Task 1.2**: Lint & Type Check 추가
+- [x] **Task 1.2**: Lint & Type Check 추가
     - `ruff check .` (Lint)
     - `ruff format --check .` (Format)
-- [ ] **Task 1.3**: Test & Coverage 설정
+- [x] **Task 1.3**: Test & Coverage 설정
     - `pytest --cov=app --cov-report=xml` 실행
     - Codecov Action 연동 (`secrets.CODECOV_TOKEN`)
 
 ### Phase 2: Delivery & Registry (지속적 제공)
 **목표**: 검증된 코드를 실행 가능한 Docker 이미지로 패키징한다.
 
-- [ ] **Task 2.1**: Docker Build Workflow 작성 (`.github/workflows/deploy.yml`)
+- [x] **Task 2.1**: Docker Build Workflow 작성 (`.github/workflows/deploy.yml`)
     - `main` 브랜치 Push 시 트리거
     - GHCR 로그인 (`secrets.GITHUB_TOKEN`)
-- [ ] **Task 2.2**: Multi-platform Build (Optional)
+- [x] **Task 2.2**: Multi-platform Build (Optional)
     - `linux/amd64`, `linux/arm64` 지원 (필요 시)
     - 이미지 태그 관리 (`latest`, `sha`)
 
 ### Phase 3: Deployment (지속적 배포)
 **목표**: Self-hosted Runner를 활용하여 안전하게 운영 서버에 배포한다. (SSH 접속 방식 대체)
 
-- [ ] **Task 3.1**: Server Runner Setup
+- [x] **Task 3.1**: Server Runner Setup
     - 배포 서버에 GitHub Actions Runner 설치 및 등록
     - 서비스 데몬 등록 (`svc.sh install`)
-- [ ] **Task 3.2**: Deploy Workflow 작성 (`deploy.yml`)
+- [x] **Task 3.2**: Deploy Workflow 작성 (`deploy.yml`)
     - `needs: build` 설정 (빌드 성공 후 실행)
     - `runs-on: self-hosted` 태그 사용
     - GHCR 로그인 및 이미지 Pull

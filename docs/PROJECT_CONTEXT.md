@@ -38,6 +38,7 @@
 
 #### 4. Plans (`docs/plans/`)
 *   **[PLAN-001 MVP Implementation](plans/PLAN_001_mvp_implementation.md)**: MVP 구축을 위한 단계별 실행 계획. (✅ Completed on 2026-01-10)
+*   **[PLAN-002 CI/CD Pipeline](plans/PLAN_002_cicd_pipeline.md)**: GitHub Actions 기반의 테스트 및 배포 자동화 계획. (✅ Completed on 2026-01-10)
 
 #### 5. Templates (`docs/templates/`)
 *   `SKILL.md`: 기능 기획 및 계획 수립을 위한 AI 에이전트용 가이드.
@@ -50,7 +51,7 @@
 ---
 
 ## 3. Next Immediate Tasks
-> MVP 구축이 완료되었습니다. 다음 작업은 새로운 마일스톤(예: AI 분석 기능)을 정의하고 시작하는 것입니다.
+> MVP 구축 및 CI/CD 파이프라인 설정이 완료되었습니다. 서비스 안정화 및 기능 확장을 준비하십시오.
 
 ### ✅ Phase 1: Environment & Foundation (Completed)
 *   [x] Task 1.1: Project Skeleton (Hello World)
@@ -76,6 +77,12 @@
 *   [x] **Task 5.2**: Calendar Watch Implementation
 *   [x] **Task 5.3**: Deep Link & HTML Success Page
 *   [x] **Task 5.4**: Ngrok Tunneling Setup
+
+### ✅ Phase 6: CI/CD Pipeline (Completed)
+*   [x] **Task 1.1**: CI Workflow (Lint/Test)
+*   [x] **Task 1.3**: Codecov Integration
+*   [x] **Task 2.1**: Delivery Workflow (GHCR)
+*   [x] **Task 3.1**: Deploy Workflow (Self-hosted)
 
 
 ---
